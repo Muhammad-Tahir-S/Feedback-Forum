@@ -1,6 +1,5 @@
 import eslint from "@eslint/js";
-import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
-import prettierPlugin from "eslint-plugin-prettier";
+import prettier from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
@@ -12,12 +11,10 @@ export default tseslint.config(
   tseslint.configs.recommended,
   {
     plugins: {
-      ...eslint.configs.recommended.plugins,
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
-      "jsx-a11y": jsxA11yPlugin,
       "simple-import-sort": simpleImportSortPlugin,
-      prettier: prettierPlugin,
+      prettier,
     },
     rules: {
       "no-unused-vars": "off",
