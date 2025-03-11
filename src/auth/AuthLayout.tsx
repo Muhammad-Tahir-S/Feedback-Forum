@@ -14,7 +14,7 @@ function AuthLayout() {
       </div>
 
       <Card className="w-full min-h-0 flex-1 max-w-md border-border bg-card">
-        <CardContent>
+        <CardContent className="overflow-y-auto">
           <Outlet />
         </CardContent>
       </Card>

@@ -48,7 +48,7 @@ const UpdatePassword: React.FC = () => {
     } else {
       setMessage('Password updated successfully.');
       setTimeout(() => {
-        navigate('/');
+        navigate('/posts');
       }, 2000);
     }
   };

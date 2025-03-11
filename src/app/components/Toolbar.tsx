@@ -21,7 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function ToolBar() {
   return (
     <div className="w-full h-[36px] flex justify-between">
-      <a href="/" className="flex gap-2 items-center max-w-fit overflow-hidden">
+      <a href="/posts" className="flex gap-2 items-center max-w-fit overflow-hidden">
         <div className="size-9 rounded-full bg-primary flex items-center justify-center shrink-0">
           <Badge className="size-[70%] stroke-2" />
         </div>

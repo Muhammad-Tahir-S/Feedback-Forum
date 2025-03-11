@@ -53,7 +53,7 @@ const NotFound = () => {
         <H3 className="mb-4 text-center">You might be looking for</H3>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <a href="/feedback" className="text-primary hover:text-primary/90 transition-colors">
+          <a href="/" className="text-primary hover:text-primary/90 transition-colors">
             Feedback
           </a>
           <a href="/roadmap" className="text-primary hover:text-primary/90 transition-colors">

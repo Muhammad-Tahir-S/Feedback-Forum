@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const formSchema = z
   .object({
     email: z.string().email({ message: 'Please enter a valid email address' }),
+    username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
     password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
     confirmPassword: z.string(),
   })
@@ -37,7 +38,7 @@ const SignUp: React.FC = () => {
   const isSubmitting = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { error } = await signUp(values.email, values.password);
+    const { error } = await signUp(values.email, values.password, values.username);
 
     if (!error) {
       navigate('/auth/signin');
@@ -63,6 +64,20 @@ const SignUp: React.FC = () => {
                     className="bg-input text-card-foreground border-border"
                     {...field}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-card-foreground">Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="Username" className="bg-input text-card-foreground border-border" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
