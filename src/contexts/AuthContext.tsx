@@ -1,4 +1,4 @@
-import { Session } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -9,7 +9,7 @@ import supabase from '../lib/supabase';
 type AuthContextType = {
   session: Session | null;
   user: UserType | null;
-  signUp: (email: string, password: string) => ReturnType<typeof supabase.auth.signUp>;
+  signUp: (email: string, password: string, username: string) => ReturnType<typeof supabase.auth.signUp>;
   signIn: (email: string, password: string) => ReturnType<typeof supabase.auth.signInWithPassword>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -26,14 +26,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
   const sessionData = localSession ? (JSON.parse(localSession) as Session) : null;
 
-  const [user, setUser] = useState<UserType | null>(sessionData?.user || null);
+  const [user, setUser] = useState<UserType | null>(sessionData?.user ? getUserFromSupabase(sessionData.user) : null);
   const [session, setSession] = useState<Session | null>(sessionData || null);
   const [loading, setLoading] = useState(true);
 
   async function initAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(session?.user ? getUserFromSupabase(session?.user) : null);
       setLoading(false);
     });
 
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(session?.user ? getUserFromSupabase(session?.user) : null);
       setLoading(false);
     });
 
@@ -52,11 +52,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     const response = await supabase.auth.signUp({
       email,
       password,
+      options: { data: { username } },
     });
 
     if (response.error) {
@@ -171,4 +172,13 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+}
+
+function getUserFromSupabase(user: User): UserType {
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.user_metadata?.['username'] || '',
+    avatar_url: '',
+  };
 }

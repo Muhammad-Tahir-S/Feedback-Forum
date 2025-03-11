@@ -15,7 +15,10 @@ const formSchema = z.object({
 });
 
 const SignIn = () => {
-  const { signIn, signInWithGoogle } = useAuth();
+  const {
+    signIn,
+    // signInWithGoogle
+  } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -32,20 +35,20 @@ const SignIn = () => {
     const { error } = await signIn(values.email, values.password);
 
     if (!error) {
-      navigate('/');
+      navigate('/posts');
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (err: unknown) {
-      form.setError('email', {
-        type: 'manual',
-        message: (err as Error).message,
-      });
-    }
-  };
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     await signInWithGoogle();
+  //   } catch (err: unknown) {
+  //     form.setError('email', {
+  //       type: 'manual',
+  //       message: (err as Error).message,
+  //     });
+  //   }
+  // };
 
   return (
     <div>
@@ -111,7 +114,7 @@ const SignIn = () => {
         </form>
       </Form>
 
-      <div className="relative my-6">
+      {/* <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t border-border" />
         </div>
@@ -144,7 +147,7 @@ const SignIn = () => {
           />
         </svg>
         Sign in with Google
-      </Button>
+      </Button> */}
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Don’t have an account?{' '}

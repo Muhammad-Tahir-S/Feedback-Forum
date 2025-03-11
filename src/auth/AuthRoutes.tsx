@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import NotFound from '@/app/components/NotFound';
+
 import AuthLayout from './AuthLayout';
 import ResetPassword from './ResetPassword';
 import SignIn from './SignIn';
@@ -16,6 +18,8 @@ export default function AuthRoutes() {
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="update-password" element={<UpdatePassword />} />
       </Route>
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

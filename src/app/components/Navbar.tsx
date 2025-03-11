@@ -15,22 +15,63 @@ type Tab = {
   icon: ReactNode;
   label?: (string & {}) | Path['title'];
   path?: Path['pathname'];
-  dropdownItems?: { label: (string & {}) | Path['title']; path: Path['pathname'] }[];
+  dropdownItems?: { label: (string & {}) | Path['title']; path: Path['pathname']; icon?: ReactNode }[];
   isExternalLink?: boolean;
 };
+
+export const feedbackDropdownItems: NonNullable<Tab['dropdownItems']> = [
+  {
+    label: 'All Posts',
+    path: '/posts',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 secondary-svg">
+        <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 00-1.032-.211 50.89 50.89 0 00-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 002.433 3.984L7.28 21.53A.75.75 0 016 21v-4.03a48.527 48.527 0 01-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979z"></path>
+        <path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 001.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0015.75 7.5z"></path>
+      </svg>
+    ),
+  },
+  {
+    label: 'Feature request',
+    path: '/posts/feature-request',
+    icon: (
+      <span role="img" aria-label="Feature request">
+        💡
+      </span>
+    ),
+  },
+  {
+    label: 'Bugs',
+    path: '/posts/bugs',
+    icon: (
+      <span role="img" aria-label="Bugs">
+        🐛
+      </span>
+    ),
+  },
+  {
+    label: 'Integrations',
+    path: '/posts/integrations',
+    icon: (
+      <span role="img" aria-label="Integrations">
+        🖇️
+      </span>
+    ),
+  },
+  {
+    label: 'Question',
+    path: '/posts/question',
+    icon: (
+      <span role="img" aria-label="Question">
+        🤔
+      </span>
+    ),
+  },
+];
 
 export default function Navbar() {
   const location = useLocation();
   const activePathname = location.pathname;
   const activePath = paths.find(({ pathname }) => pathname === activePathname);
-
-  const feedbackDropdownItems: Tab['dropdownItems'] = [
-    { label: 'All Posts', path: '/' },
-    { label: 'Feature request', path: '/feature-request' },
-    { label: 'Bugs', path: '/bugs' },
-    { label: 'Integrations', path: '/integrations' },
-    { label: 'Question', path: '/question' },
-  ];
 
   const roadmapDropdownItems: Tab['dropdownItems'] = [
     { label: 'Universal Roadmap', path: '/universal-roadmap' },
@@ -78,7 +119,7 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
       {tabs.map((tab) => (
         <div key={`${tab.path}_${tab.label}`} className="relative flex-shrink-0">
           {tab?.dropdownItems?.length ? (
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger
                 className={cn(
                   tabTriggerBaseStyles,
@@ -123,7 +164,12 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
               >
                 {tab.dropdownItems?.map((item, index) => (
                   <a key={index} href={item.path}>
-                    <DropdownMenuItem>{item.label}</DropdownMenuItem>
+                    <DropdownMenuItem className="focus:bg-secondary rounded-[6px]">
+                      <span className="flex items-center space-x-2">
+                        {item.icon && <span>{item.icon}</span>}
+                        <span>{item.label}</span>
+                      </span>
+                    </DropdownMenuItem>
                   </a>
                 ))}
               </DropdownMenuContent>
@@ -157,7 +203,7 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
 }
 
 const tabTriggerBaseStyles =
-  'flex items-center outline-none border border-b-0 font-medium text-sm sm:text-[15px] py-2.5 px-1.5 sm:px-2 transition-colors cursor-pointer rounded-t-[0.5rem] rounded-b-none';
+  'flex items-center outline-none border border-b-0 font-medium text-sm sm:text-[15px] py-2.5 px-1.5 sm:px-2 transition-all duration-300 cursor-pointer rounded-t-[0.5rem] rounded-b-none';
 const tabTriggerActiveStyles = 'text-foreground bg-accent  border-primary/40  shadow-none';
 const tabTriggerInactiveStyles = 'text-foreground/80 border-transparent hover:border-primary/40 hover:bg-accent';
 const tabIconBaseStyles = 'w-4 h-4 mr-1 sm:w-5 sm:h-5';
