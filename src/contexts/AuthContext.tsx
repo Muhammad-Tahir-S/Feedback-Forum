@@ -1,12 +1,10 @@
 import { Session } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { toast } from "sonner"
+import { toast } from 'sonner';
 
 import { UserType } from '@/types/auth';
 
-import supabase from '../lib/supabase'
-
-
+import supabase from '../lib/supabase';
 
 type AuthContextType = {
   session: Session | null;
@@ -27,26 +25,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
- async function initAuth(){
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    setSession(session);
-    setUser(session?.user ?? null);
-    setLoading(false);
-  });
-
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
+  async function initAuth() {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-    }
-  );
+    });
 
-  return () => subscription.unsubscribe();
- }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }
 
   useEffect(() => {
-    initAuth()
+    initAuth();
   }, []);
 
   const signUp = async (email: string, password: string) => {
@@ -55,14 +53,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     });
-    
+
     if (response.error) {
-      toast.error("Sign up failed",{
+      toast.error('Sign up failed', {
         description: response.error.message,
       });
     } else if (response.data?.user) {
-      toast.success("Verification email sent",{
-        description: "Please check your email to verify your account.",
+      toast.success('Verification email sent', {
+        description: 'Please check your email to verify your account.',
       });
     }
 
@@ -78,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (response.error) {
-      toast.error("Sign in failed",{
+      toast.error('Sign in failed', {
         description: response.error.message,
       });
     }
@@ -100,8 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     await supabase.auth.signOut();
 
-    toast.info("Signed out", {
-      description: "You have been successfully signed out.",
+    toast.info('Signed out', {
+      description: 'You have been successfully signed out.',
     });
 
     setLoading(false);
@@ -110,16 +108,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string) => {
     setLoading(true);
     const response = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: `${window.location.origin}/auth/update-password`,
     });
 
     if (response.error) {
-      toast.error("Password reset failed",{
+      toast.error('Password reset failed', {
         description: response.error.message,
       });
-    } else  {
-      toast.success("Password reset email sent",{
-        description: "Please check your email for the password reset link.",
+    } else {
+      toast.success('Password reset email sent', {
+        description: 'Please check your email for the password reset link.',
       });
     }
 
@@ -134,12 +132,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (response.error) {
-      toast.error("Password update failed",{
+      toast.error('Password update failed', {
         description: response.error.message,
       });
-    } else  {
-      toast.success("Password updated",{
-        description: "Your password has been successfully updated.",
+    } else {
+      toast.success('Password updated', {
+        description: 'Your password has been successfully updated.',
       });
     }
 

@@ -1,11 +1,11 @@
-import { ReactNode } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
-import AuthRoutes from "@/auth";
-import { useAuth } from "@/contexts/AuthContext";
-import HomePage from "@/home";
+import AuthRoutes from '@/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import HomePage from '@/home';
 
-import MainLayout from "./MainLayout";
+import MainLayout from './MainLayout';
 
 function MainRoutes() {
   return (
@@ -44,5 +44,5 @@ function RequireAuth({ children }: { children: ReactNode }) {
     return children;
   }
 
-  return <Navigate replace to={"/auth/signin"} state={{ from: location }} />;
+  return <Navigate replace to={'/auth/signin'} state={{ from: location }} />;
 }

@@ -5,7 +5,7 @@ import {
   // Stars,
   User,
   UserCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -13,13 +13,9 @@ import {
   DropdownMenuItem,
   // DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { H3 } from "@/components/ui/typography";
+} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { H3 } from '@/components/ui/typography';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
@@ -37,9 +33,7 @@ function NavBar() {
         <div className="size-9 rounded-full bg-primary flex items-center justify-center shrink-0">
           <Badge className="size-[70%] stroke-2" />
         </div>
-        <H3 className="truncate max-w-xs text-secondary-foreground">
-          Featurebase Clone
-        </H3>
+        <H3 className="truncate max-w-xs text-secondary-foreground">Featurebase Clone</H3>
       </a>
 
       <div className="flex gap-4">
@@ -61,13 +55,13 @@ function Notifications() {
           <Bell className="size-5 fill-secondary-foreground" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80" align='end'></PopoverContent>
+      <PopoverContent className="w-80" align="end"></PopoverContent>
     </Popover>
   );
 }
 
 function UserDropdown() {
-  const {signOut, loading} = useAuth()
+  const { signOut, loading } = useAuth();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -79,7 +73,7 @@ function UserDropdown() {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-[208px]" align='end'>
+      <DropdownMenuContent className="w-[208px]" align="end">
         <DropdownMenuItem>
           <UserCircle /> My Profile
         </DropdownMenuItem>

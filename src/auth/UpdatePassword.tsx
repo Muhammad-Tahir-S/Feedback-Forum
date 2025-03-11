@@ -1,30 +1,23 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z
   .object({
-    password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
 const UpdatePassword: React.FC = () => {
@@ -34,8 +27,8 @@ const UpdatePassword: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      password: "",
-      confirmPassword: "",
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -48,14 +41,14 @@ const UpdatePassword: React.FC = () => {
     const { error } = await updatePassword(values.password);
 
     if (error) {
-      form.setError("password", {
-        type: "manual",
+      form.setError('password', {
+        type: 'manual',
         message: error.message,
       });
     } else {
-      setMessage("Password updated successfully.");
+      setMessage('Password updated successfully.');
       setTimeout(() => {
-        navigate("/");
+        navigate('/');
       }, 2000);
     }
   };
@@ -63,15 +56,9 @@ const UpdatePassword: React.FC = () => {
   return (
     <div>
       <h2 className="text-2xl font-bold text-card-foreground">Update password</h2>
-      <p className="text-muted-foreground">
-        Enter your new password below to update your account.
-      </p>
+      <p className="text-muted-foreground">Enter your new password below to update your account.</p>
 
-      {message && (
-        <div className="mt-4 rounded-md bg-green-100 p-3 text-sm text-green-800">
-          {message}
-        </div>
-      )}
+      {message && <div className="mt-4 rounded-md bg-green-100 p-3 text-sm text-green-800">{message}</div>}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
@@ -122,7 +109,7 @@ const UpdatePassword: React.FC = () => {
                 Updating password...
               </>
             ) : (
-              "Update password"
+              'Update password'
             )}
           </Button>
         </form>
