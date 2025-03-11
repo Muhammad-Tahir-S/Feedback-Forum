@@ -1,25 +1,18 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { Link,useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(1, { message: "Password is required" }),
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  password: z.string().min(1, { message: 'Password is required' }),
 });
 
 const SignIn: React.FC = () => {
@@ -29,8 +22,8 @@ const SignIn: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
@@ -40,7 +33,7 @@ const SignIn: React.FC = () => {
     const { error } = await signIn(values.email, values.password);
 
     if (!error) {
-      navigate("/dashboard");
+      navigate('/dashboard');
     }
   };
 
@@ -48,8 +41,8 @@ const SignIn: React.FC = () => {
     try {
       await signInWithGoogle();
     } catch (err: unknown) {
-      form.setError("email", {
-        type: "manual",
+      form.setError('email', {
+        type: 'manual',
         message: (err as Error).message,
       });
     }
@@ -58,9 +51,7 @@ const SignIn: React.FC = () => {
   return (
     <div>
       <h2 className="text-2xl font-bold text-card-foreground">Sign in</h2>
-      <p className="text-muted-foreground">
-        Enter your credentials to access your account
-      </p>
+      <p className="text-muted-foreground">Enter your credentials to access your account</p>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
@@ -88,10 +79,7 @@ const SignIn: React.FC = () => {
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel className="text-card-foreground">Password</FormLabel>
-                  <Link
-                    to="/auth/reset-password"
-                    className="text-xs text-primary hover:underline"
-                  >
+                  <Link to="/auth/reset-password" className="text-xs text-primary hover:underline">
                     Forgot password?
                   </Link>
                 </div>
@@ -118,7 +106,7 @@ const SignIn: React.FC = () => {
                 Signing in...
               </>
             ) : (
-              "Sign in"
+              'Sign in'
             )}
           </Button>
         </form>
@@ -129,9 +117,7 @@ const SignIn: React.FC = () => {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground">
-            Or continue with
-          </span>
+          <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
         </div>
       </div>
 
@@ -162,7 +148,7 @@ const SignIn: React.FC = () => {
       </Button>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Don’t have an account?{" "}
+        Don’t have an account?{' '}
         <Link to="/auth/signup" className="text-primary hover:underline">
           Sign up
         </Link>

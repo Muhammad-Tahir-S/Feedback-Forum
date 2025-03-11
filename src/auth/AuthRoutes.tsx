@@ -1,10 +1,10 @@
-import { Navigate,Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import AuthLayout from "./AuthLayout";
-import ResetPassword from "./ResetPassword";
-import SignIn from "./SignIn";
-import SignUp from "./SignUp";
-import UpdatePassword from "./UpdatePassword";
+import AuthLayout from './AuthLayout';
+import ResetPassword from './ResetPassword';
+import SignIn from './SignIn';
+import SignUp from './SignUp';
+import UpdatePassword from './UpdatePassword';
 
 export default function AuthRoutes() {
   return (

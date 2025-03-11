@@ -9,10 +9,10 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       const { hash } = window.location;
-      
+
       if (hash) {
         const { data, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error('Error during auth callback:', error);
           navigate('/auth/signin');
