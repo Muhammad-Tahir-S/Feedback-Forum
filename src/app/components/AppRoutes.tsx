@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import HomePage from '@/home';
 
 import MainLayout from './MainLayout';
+import NotFound from './NotFound';
 
 function MainRoutes() {
   return (
@@ -13,8 +14,7 @@ function MainRoutes() {
       <Routes>
         <Route path="/" element={<HomePage />} />
 
-        {/* //catch-all */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </MainLayout>
   );

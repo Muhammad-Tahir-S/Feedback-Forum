@@ -21,8 +21,13 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserType | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const localSession = localStorage.getItem(
+    'sb-' + import.meta.env.VITE_SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token'
+  );
+  const sessionData = localSession ? (JSON.parse(localSession) as Session) : null;
+
+  const [user, setUser] = useState<UserType | null>(sessionData?.user || null);
+  const [session, setSession] = useState<Session | null>(sessionData || null);
   const [loading, setLoading] = useState(true);
 
   async function initAuth() {

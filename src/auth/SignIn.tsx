@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -15,7 +14,7 @@ const formSchema = z.object({
   password: z.string().min(1, { message: 'Password is required' }),
 });
 
-const SignIn: React.FC = () => {
+const SignIn = () => {
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -33,7 +32,7 @@ const SignIn: React.FC = () => {
     const { error } = await signIn(values.email, values.password);
 
     if (!error) {
-      navigate('/dashboard');
+      navigate('/');
     }
   };
 
