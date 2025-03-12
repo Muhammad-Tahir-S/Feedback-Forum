@@ -104,8 +104,8 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
             </div>
           </div>
 
-          <div className="relative z-[50] py-3.5 px-4 bg-popover border-t border-accent">
-            <p className="pointer-events-none absolute text-xs font-medium text-gray-400 dark:text-foreground">
+          <div className="relative z-[50] px-4 bg-popover border-t border-accent">
+            <p className="pt-3.5 pointer-events-none absolute text-xs font-medium text-gray-400 dark:text-foreground">
               Environment?
             </p>
             <textarea
