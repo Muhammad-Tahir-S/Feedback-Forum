@@ -3,10 +3,10 @@ import {
   Bell,
   LogOut,
   // Stars,
-  User,
   UserCircle,
 } from 'lucide-react';
 
+import UserAvatar from '@/components/Avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ export default function ToolBar() {
     <div className="w-full h-[36px] flex justify-between">
       <a href="/posts" className="flex gap-2 items-center max-w-fit overflow-hidden">
         <div className="size-9 rounded-full bg-primary flex items-center justify-center shrink-0">
-          <Badge className="size-[70%] stroke-2" />
+          <Badge className="size-[70%] stroke-4" />
         </div>
         <H3 className="truncate max-w-xs text-secondary-foreground">Featurebase Clone</H3>
       </a>
@@ -57,11 +57,8 @@ function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="size-9 rounded-full  p-[7px] outline-0 bg-secondary border border-border cursor-pointer hover:bg-border"
-        >
-          <User className="size-full fill-secondary-foreground" />
+        <button type="button" className="outline-0 rounded-full cursor-pointer hover:bg-border">
+          <UserAvatar />
         </button>
       </DropdownMenuTrigger>
 

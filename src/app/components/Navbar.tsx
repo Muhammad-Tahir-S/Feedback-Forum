@@ -157,14 +157,10 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
                   </svg>
                 )}
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                sideOffset={0}
-                align="start"
-                className="backdrop-blur-lg bg-popover/30 min-w-[192px] w-auto max-w-[320px]"
-              >
+              <DropdownMenuContent sideOffset={0} align="start">
                 {tab.dropdownItems?.map((item, index) => (
                   <a key={index} href={item.path}>
-                    <DropdownMenuItem className="focus:bg-secondary rounded-[6px]">
+                    <DropdownMenuItem>
                       <span className="flex items-center space-x-2">
                         {item.icon && <span>{item.icon}</span>}
                         <span>{item.label}</span>
@@ -204,8 +200,8 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
 
 const tabTriggerBaseStyles =
   'flex items-center outline-none border border-b-0 font-medium text-sm sm:text-[15px] py-2.5 px-1.5 sm:px-2 transition-all duration-300 cursor-pointer rounded-t-[0.5rem] rounded-b-none';
-const tabTriggerActiveStyles = 'text-foreground bg-accent  border-primary/40  shadow-none';
-const tabTriggerInactiveStyles = 'text-foreground/80 border-transparent hover:border-primary/40 hover:bg-accent';
+const tabTriggerActiveStyles = 'text-foreground bg-[#0D192C]  border-accent  shadow-none';
+const tabTriggerInactiveStyles = 'text-foreground/80 border-transparent hover:border-accent  hover:bg-[#0D192C]';
 const tabIconBaseStyles = 'w-4 h-4 mr-1 sm:w-5 sm:h-5';
 const tabIconActiveStyles = 'text-primary';
 const tabIconInactiveStyles = 'text-primary/70';
