@@ -13,7 +13,7 @@ export default function Boards() {
   const location = useLocation();
 
   return (
-    <div className="w-full hidden md:block">
+    <div className="w-full">
       <P className="mb-2 text-secondary-foreground">Boards</P>
       <div className="w-full flex flex-col gap-1">
         {boardItems.map(({ path, label, icon }) => (
