@@ -45,9 +45,9 @@ function Loader() {
     <div className="mt-16">
       <div>
         <div className="flex items-center justify-center mt-4 pb-7">
-          <div className="w-6 h-6 secondary-svg ">
+          <div className="w-6 h-6 secondary-svg">
             <svg
-              className="inherit-width inherit-height"
+              className="inherit-width inherit-height animate-spin"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 100 100"
               preserveAspectRatio="xMidYMid"
@@ -62,16 +62,7 @@ function Loader() {
                 strokeDasharray="50.26548245743669 50.26548245743669"
                 fill="none"
                 strokeLinecap="round"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  repeatCount="indefinite"
-                  dur="1.075268817204301s"
-                  keyTimes="0;1"
-                  values="0 50 50;360 50 50"
-                ></animateTransform>
-              </circle>
+              />
             </svg>
           </div>
         </div>
