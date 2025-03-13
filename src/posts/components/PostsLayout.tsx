@@ -4,6 +4,7 @@ import { Large, Muted } from '@/components/ui/typography';
 
 import Boards from './Boards';
 import CreatePostButton from './CreatePostButton';
+import { SortSelector } from './SortSelector';
 
 export default function PostsLayout() {
   return (
@@ -21,6 +22,7 @@ export default function PostsLayout() {
 
         <div className="p-4 -m-4 overflow-x-auto scrollbar-none">
           <div className="flex justify-between gap-3 mt-4">
+            <SortSelector />
             <div className="hidden lg:block">
               <CreatePostButton />
             </div>

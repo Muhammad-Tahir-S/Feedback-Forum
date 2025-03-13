@@ -5,19 +5,19 @@ export type Database = {
     Tables: {
       boards: {
         Row: {
-          description: string | null;
           id: string;
           name: string | null;
+          value: string;
         };
         Insert: {
-          description?: string | null;
           id?: string;
           name?: string | null;
+          value?: string;
         };
         Update: {
-          description?: string | null;
           id?: string;
           name?: string | null;
+          value?: string;
         };
         Relationships: [];
       };
@@ -56,9 +56,14 @@ export type Database = {
       posts: {
         Row: {
           board: string;
+          bug_sources: string[] | null;
+          comments_count: number;
           created_at: string;
           description: string | null;
           id: string;
+          integrations: string[] | null;
+          is_pinned: boolean | null;
+          module: string | null;
           status: Database['public']['Enums']['status'];
           title: string | null;
           user_id: string;
@@ -66,9 +71,14 @@ export type Database = {
         };
         Insert: {
           board: string;
+          bug_sources?: string[] | null;
+          comments_count?: number;
           created_at?: string;
           description?: string | null;
           id?: string;
+          integrations?: string[] | null;
+          is_pinned?: boolean | null;
+          module?: string | null;
           status?: Database['public']['Enums']['status'];
           title?: string | null;
           user_id: string;
@@ -76,9 +86,14 @@ export type Database = {
         };
         Update: {
           board?: string;
+          bug_sources?: string[] | null;
+          comments_count?: number;
           created_at?: string;
           description?: string | null;
           id?: string;
+          integrations?: string[] | null;
+          is_pinned?: boolean | null;
+          module?: string | null;
           status?: Database['public']['Enums']['status'];
           title?: string | null;
           user_id?: string;

@@ -1,1 +1,1 @@
-export { default } from './components/AppRoutes';
+export { default } from './components/App';

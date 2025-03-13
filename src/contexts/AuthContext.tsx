@@ -1,4 +1,6 @@
 import { Session, User } from '@supabase/supabase-js';
+import { useLocalStorage } from '@uidotdev/usehooks';
+import { Database } from 'database.types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -17,6 +19,7 @@ type AuthContextType = {
   resetPassword: (email: string) => ReturnType<typeof supabase.auth.resetPasswordForEmail>;
   updatePassword: (password: string) => ReturnType<typeof supabase.auth.updateUser>;
 };
+type Board = Database['public']['Tables']['boards']['Row'];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -29,11 +32,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserType | null>(sessionData?.user ? getUserFromSupabase(sessionData.user) : null);
   const [session, setSession] = useState<Session | null>(sessionData || null);
   const [loading, setLoading] = useState(true);
+  const [boards] = useLocalStorage<Board[] | null>('boards');
 
   async function initAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ? getUserFromSupabase(session?.user) : null);
+      if (session?.user) {
+        setSession(session);
+        setUser(getUserFromSupabase(session?.user));
+
+        if (!boards) {
+          supabase
+            .from('boards')
+            .select()
+            .then(({ data }) => {
+              if (data?.length) {
+                localStorage.setItem('boards', JSON.stringify(data));
+              }
+            });
+        }
+      } else {
+        setSession(null);
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -51,6 +71,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     initAuth();
   }, []);
+
+  useEffect(() => {
+    if (sessionData && !boards) {
+      supabase
+        .from('boards')
+        .select()
+        .then(({ data }) => {
+          if (data?.length) {
+            localStorage.setItem('boards', JSON.stringify(data));
+          }
+        });
+    }
+  }, [sessionData, boards]);
 
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);

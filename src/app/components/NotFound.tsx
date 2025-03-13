@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { H1, H3, Lead } from '@/components/ui/typography';
 
@@ -6,7 +6,7 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center size-full px-4 py-8">
+    <div className="flex flex-col items-center justify-center w-full px-4 py-8">
       <div className="mb-8 text-primary w-40 h-40 sm:w-48 sm:h-48">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
           <path
@@ -53,18 +53,18 @@ const NotFound = () => {
         <H3 className="mb-4 text-center">You might be looking for</H3>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <a href="/" className="text-primary hover:text-primary/90 transition-colors">
+          <Link to="/" className="text-primary hover:text-primary/90 transition-colors">
             Feedback
-          </a>
-          <a href="/roadmap" className="text-primary hover:text-primary/90 transition-colors">
+          </Link>
+          <Link to="/roadmap" className="text-primary hover:text-primary/90 transition-colors">
             Roadmap
-          </a>
-          <a href="/changelog" className="text-primary hover:text-primary/90 transition-colors">
+          </Link>
+          <Link to="/changelog" className="text-primary hover:text-primary/90 transition-colors">
             Changelog
-          </a>
-          <a href="/help" className="text-primary hover:text-primary/90 transition-colors">
+          </Link>
+          <Link to="/help" className="text-primary hover:text-primary/90 transition-colors">
             Help Center
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,17 +1,7 @@
 import './index.css';
 
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router';
 
-import AppRoutes from './app/components/AppRoutes';
-import { Toaster } from './components/ui/sonner';
-import { AuthProvider } from './contexts/AuthContext';
+import App from './app';
 
-createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <AuthProvider>
-      <AppRoutes />
-      <Toaster />
-    </AuthProvider>
-  </BrowserRouter>
-);
+createRoot(document.getElementById('root')!).render(<App />);
