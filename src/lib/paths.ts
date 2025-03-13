@@ -1,6 +1,6 @@
 export const paths = [
   { pathname: '/posts' as const, title: 'Feedback' as const },
-  { pathname: '/posts/feature-request' as const, title: 'Feature request' as const },
+  { pathname: '/posts/feature-request' as const, title: 'Feature Request' as const },
   { pathname: '/posts/bugs' as const, title: 'Bugs' as const },
   { pathname: '/posts/integrations' as const, title: 'Integrations' as const },
   { pathname: '/posts/question' as const, title: 'Question' as const },

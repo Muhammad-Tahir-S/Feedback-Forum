@@ -1,12 +1,18 @@
 import { DialogTitle } from '@radix-ui/react-dialog';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Database } from 'database.types';
 import { ChevronRight, X } from 'lucide-react';
 import { ComponentProps, useState } from 'react';
+import { useLocation } from 'react-router';
+import { toast } from 'sonner';
 
-import { feedbackDropdownItems } from '@/app/components/Navbar';
 import UserAvatar from '@/components/Avatar';
 import ProseMirrorEditor from '@/components/ProseMirroEditor';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
+import useGetBoardItems from '@/hooks/useGetBoardItems';
+import supabase from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 import SearchDropdownContent from './SearchDropdownContent';
@@ -14,16 +20,73 @@ import SelectDropdown from './SelectDropdown';
 
 type DropdownItem = ComponentProps<typeof SearchDropdownContent>['items'][number];
 
-export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
-  const [title, setTitle] = useState('');
-  const [_content, setContent] = useState('');
-  const [selectedBugSources, setSelectedBugSources] = useState<string[] | null>(null);
+type CreatePostPayload = Database['public']['Tables']['posts']['Insert'];
 
+export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  const [title, setTitle] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [description, setDescription] = useState('');
+  const [selectedBugSources, setSelectedBugSources] = useState<string[] | null>(null);
+  const { boards } = useGetBoardItems();
+
+  const boardId =
+    location?.pathname === '/posts' ? undefined : boards.find((item) => item.path === location?.pathname)?.id;
+
+  const boardOptions = boards
+    .filter((item) => item.path !== '/posts')
+    .map((item) => ({
+      label: item.label,
+      icon: item.icon,
+      value: item.id || '',
+    }));
   const [selectedBoard, setSelectedBoard] = useState<DropdownItem | null>(
-    boardOptions.find((opt) => opt.label === 'Feature request') || null
+    boardOptions.find((opt) => opt.label === 'Feature Request') || null
   );
+
   const [selectedModule, setSelectedModule] = useState<DropdownItem | null>(null);
   const [selectedIntegration, setSelectedIntegration] = useState<DropdownItem | null>(null);
+
+  const createPost = async (postData: CreatePostPayload) => {
+    const { data, error } = await supabase.from('posts').insert(postData).select('*').single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: createPostMutation, isPending } = useMutation({
+    mutationFn: async () =>
+      await createPost({
+        board: selectedBoard?.value || 'feature_request',
+        bug_sources: selectedBugSources,
+        user_id: user?.id || '',
+        description,
+        integrations: selectedIntegration?.value ? [selectedIntegration?.value] : null,
+        module: selectedModule?.value,
+        title,
+      }),
+    onSuccess: (data) => {
+      toast.success('Post created successfully!', {
+        description: `Your post "${data.title}" has been created.`,
+      });
+      onClose();
+      queryClient.invalidateQueries({ queryKey: ['posts', boardId] });
+    },
+    onError: (error) => {
+      toast.error('Failed to create post', {
+        description: error.message || 'Unknown error occurred',
+      });
+    },
+  });
+
+  const isInvalid = title?.length < 3;
 
   return (
     <div>
@@ -73,12 +136,23 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
           className="text-base font-medium bg-transparent border-0 w-full text-foreground sm:text-lg focus:outline-none focus:ring-0 px-4 py-2"
           placeholder="Title of your post"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value?.length > 2 && isSubmitted) {
+              setIsSubmitted(false);
+            }
+            setTitle(e.target.value);
+          }}
         />
       </div>
 
+      {isSubmitted && isInvalid ? (
+        <div className="px-4">
+          <p className="text-sm text-red-500/80 mt-0.5">Title must be longer that 2 characters.</p>
+        </div>
+      ) : null}
+
       <div className="px-1 mb-1">
-        <ProseMirrorEditor placeholder="Post description..." onChange={setContent} />
+        <ProseMirrorEditor placeholder="Post description..." onChange={setDescription} />
       </div>
 
       {selectedBoard?.label === 'Bugs' ? (
@@ -155,7 +229,17 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
               Create more
             </label>
           </div> */}
-          <Button size="sm" className="text-xs text-primary-foreground">
+          <Button
+            size="sm"
+            className="text-xs text-primary-foreground"
+            disabled={isPending}
+            onClick={async () => {
+              setIsSubmitted(true);
+              if (!isInvalid) {
+                createPostMutation();
+              }
+            }}
+          >
             Submit Post
           </Button>
         </div>
@@ -163,14 +247,6 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
     </div>
   );
 }
-
-const boardOptions = feedbackDropdownItems
-  .filter((item) => item.path !== '/posts')
-  .map((item) => ({
-    label: item.label,
-    icon: item.icon,
-    value: item.label.toLocaleLowerCase().split(' ').join('_'),
-  }));
 
 const moduleOptions: DropdownItem[] = [
   { label: 'Feedback Portal', value: 'feedback_portal' },
@@ -217,11 +293,6 @@ function BugBadge({
       type="button"
       onClick={() => onSelect(value)}
     >
-      <span className="mr-1 -ml-[2px]">
-        <div role="img" aria-label="Featured icon">
-          <span className="">{boardOptions.find((opt) => opt.value === value)?.icon}</span>
-        </div>
-      </span>
       {label}
     </button>
   );
