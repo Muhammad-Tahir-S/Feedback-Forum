@@ -1,22 +1,27 @@
+import { useLocalStorage } from '@uidotdev/usehooks';
+import { Database } from 'database.types';
 import { Route, Routes } from 'react-router-dom';
 
 import NotFound from '@/app/components/NotFound';
-import useGetBoardItems from '@/hooks/useGetBoardItems';
 
 import PostsLayout from './PostsLayout';
 import PostsList from './PostsList';
 
+type Board = Database['public']['Tables']['boards']['Row'];
+
 export default function PostRoutes() {
-  const { boards } = useGetBoardItems();
+  const [boards] = useLocalStorage<Board[]>('boards');
+
+  const boardItems = [{ value: 'posts', id: undefined }, ...boards];
 
   return (
     <Routes>
       <Route path="/*" element={<PostsLayout />}>
-        {boards.map(({ label, path, id }) => {
-          return path === '/posts' ? (
-            <Route key={label} index element={<PostsList boardId={id} />} />
+        {boardItems.map(({ value, id }) => {
+          return value === 'posts' ? (
+            <Route key={value} index element={<PostsList boardId={id} />} />
           ) : (
-            <Route key={label} path={path.split('/').at(-1)} element={<PostsList boardId={id} />} />
+            <Route key={value} path={value} element={<PostsList boardId={id} />} />
           );
         })}
       </Route>
