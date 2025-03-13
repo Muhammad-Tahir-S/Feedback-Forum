@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (user && !boards) {
+    if (sessionData && !boards) {
       supabase
         .from('boards')
         .select()
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         });
     }
-  }, [user, boards]);
+  }, [sessionData, boards]);
 
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import {
   DropdownMenu,
@@ -113,20 +113,20 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={0} align="start">
                 {tab.dropdownItems?.map((item, index) => (
-                  <a key={index} href={item.path}>
+                  <Link key={index} to={item.path}>
                     <DropdownMenuItem>
                       <span className="flex items-center space-x-2">
                         {item.icon && <span>{item.icon}</span>}
                         <span>{item.label}</span>
                       </span>
                     </DropdownMenuItem>
-                  </a>
+                  </Link>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <a
-              href={tab.path}
+            <Link
+              to={tab.path as string}
               target={tab.isExternalLink ? '_blank' : undefined}
               rel={tab.isExternalLink ? 'noreferrer' : undefined}
               className={cn(
@@ -144,7 +144,7 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
                 {tab.icon}
               </span>
               {typeof tab.label === 'string' ? <span className="truncate max-w-[220px]">{tab.label}</span> : tab.label}
-            </a>
+            </Link>
           )}
         </div>
       ))}
