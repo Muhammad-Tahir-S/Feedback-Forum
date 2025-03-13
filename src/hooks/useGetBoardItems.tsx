@@ -8,7 +8,7 @@ type Board = Database['public']['Tables']['boards']['Row'];
 type Path = (typeof paths)[number];
 
 export default function useGetBoardItems() {
-  const [boards] = useLocalStorage<Board[]>('boards');
+  const [boards] = useLocalStorage<Board[] | null>('boards');
 
   const boardItems: {
     label: (string & {}) | Path['title'];
@@ -67,7 +67,7 @@ export default function useGetBoardItems() {
         </span>
       ),
     },
-  ].map((item) => ({ ...item, id: boards.find((b) => b.name === item.label)?.id }));
+  ].map((item) => ({ ...item, id: boards?.find((b) => b.name === item.label)?.id }));
 
   return { boards: boardItems };
 }

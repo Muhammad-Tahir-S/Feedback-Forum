@@ -5,6 +5,7 @@ import {
   // Stars,
   UserCircle,
 } from 'lucide-react';
+import { Link } from 'react-router';
 
 import UserAvatar from '@/components/Avatar';
 import {
@@ -21,12 +22,12 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function ToolBar() {
   return (
     <div className="w-full h-[36px] flex justify-between">
-      <a href="/posts" className="flex gap-2 items-center max-w-fit overflow-hidden">
+      <Link to="/posts" className="flex gap-2 items-center max-w-fit overflow-hidden">
         <div className="size-9 rounded-full bg-primary flex items-center justify-center shrink-0">
           <Badge className="size-[70%] stroke-4" />
         </div>
         <H3 className="truncate max-w-xs text-secondary-foreground">Featurebase Clone</H3>
-      </a>
+      </Link>
 
       <div className="flex gap-4">
         <Notifications />
