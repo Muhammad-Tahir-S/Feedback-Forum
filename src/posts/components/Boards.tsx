@@ -1,11 +1,13 @@
 import { useLocation } from 'react-router';
 
-import { feedbackDropdownItems } from '@/app/components/Navbar';
 import { P } from '@/components/ui/typography';
+import useGetBoardItems from '@/hooks/useGetBoardItems';
 import { cn } from '@/lib/utils';
 
 export default function Boards() {
-  const boardItems = feedbackDropdownItems.map((item) => ({
+  const { boards } = useGetBoardItems();
+
+  const boardItems = boards.map((item) => ({
     ...item,
     label: item.path === '/posts' ? 'View All Posts' : item.label,
   }));
