@@ -46,7 +46,7 @@ export const PostCard = ({
 
   const isUpvoted = user?.id && votes?.includes(user?.id);
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async ({ postId, userId }: { postId: string; userId: string }) => {
       await supabase
         .from('posts')
@@ -211,7 +211,8 @@ export const PostCard = ({
         <button
           aria-label={`${votes_count} upvotes. ${isUpvoted ? 'You upvoted this' : 'Click to upvote'}`}
           onClick={async () => await mutateAsync({ userId: user?.id || '', postId: id })}
-          className="cursor-pointer flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in"
+          disabled={isPending}
+          className="cursor-pointer flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in disabled:cursor-not-allowed disabled:opacity-70"
         >
           <div className="group-hover:text-foreground flex flex-col items-center justify-center pb-1 px-2 rounded-md">
             <svg

@@ -26,8 +26,13 @@ export default function PostsList() {
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
 
-      query = query.order(sortBy, { ascending: false, nullsFirst: false });
-
+      if (sortBy === 'comments_count') {
+        query = query
+          .order('comments_count', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false });
+      } else {
+        query = query.order(sortBy, { ascending: false, nullsFirst: false });
+      }
       const res = await query;
       return res?.data as PostWithUser[];
     },
