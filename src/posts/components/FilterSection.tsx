@@ -91,10 +91,10 @@ export default function FilterSection() {
           >
             {!isSearchActive ? (
               <>
-                <LucideSearch /> <span className="ml-auto hidden sm:inline">Search</span>
+                <LucideSearch className="size-4" /> <span className="ml-auto hidden sm:inline">Search</span>
               </>
             ) : (
-              <X />
+              <X className="size-4" />
             )}
           </button>
         </div>
