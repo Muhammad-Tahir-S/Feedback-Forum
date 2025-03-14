@@ -51,6 +51,20 @@ export type Database = {
             referencedRelation: 'posts';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'comments_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts_with_user';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts_with_users';
+            referencedColumns: ['id'];
+          },
         ];
       };
       posts: {
@@ -136,14 +150,86 @@ export type Database = {
             referencedRelation: 'posts';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'votes_post_id_fkey1';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts_with_user';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'votes_post_id_fkey1';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts_with_users';
+            referencedColumns: ['id'];
+          },
         ];
       };
     };
     Views: {
-      [_ in never]: never;
+      posts_with_user: {
+        Row: {
+          board: string | null;
+          bug_sources: string[] | null;
+          comments_count: number | null;
+          created_at: string | null;
+          description: string | null;
+          id: string | null;
+          integrations: string[] | null;
+          is_pinned: boolean | null;
+          module: string | null;
+          status: Database['public']['Enums']['status'] | null;
+          title: string | null;
+          user: Json | null;
+          user_id: string | null;
+          votes_count: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'post_board_fkey';
+            columns: ['board'];
+            isOneToOne: false;
+            referencedRelation: 'boards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      posts_with_users: {
+        Row: {
+          board: string | null;
+          bug_sources: string[] | null;
+          comments_count: number | null;
+          created_at: string | null;
+          description: string | null;
+          id: string | null;
+          integrations: string[] | null;
+          is_pinned: boolean | null;
+          module: string | null;
+          status: Database['public']['Enums']['status'] | null;
+          title: string | null;
+          user: Json | null;
+          user_id: string | null;
+          votes_count: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'post_board_fkey';
+            columns: ['board'];
+            isOneToOne: false;
+            referencedRelation: 'boards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Functions: {
-      [_ in never]: never;
+      get_post_user: {
+        Args: {
+          post_id: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       status: 'pending' | 'planned' | 'in_progress' | 'completed' | 'rejected' | 'closed';

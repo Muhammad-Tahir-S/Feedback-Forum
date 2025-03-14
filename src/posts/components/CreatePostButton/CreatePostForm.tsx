@@ -6,10 +6,10 @@ import { ComponentProps, useState } from 'react';
 import { useLocation } from 'react-router';
 import { toast } from 'sonner';
 
-import UserAvatar from '@/components/Avatar';
 import ProseMirrorEditor from '@/components/ProseMirroEditor';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
 import supabase from '@/lib/supabase';
@@ -133,6 +133,7 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
       <div className="relative mt-1 z-[50] px-1">
         <input
           id="create-post-title"
+          autoFocus
           className="text-base font-medium bg-transparent border-0 w-full text-foreground sm:text-lg focus:outline-none focus:ring-0 px-4 py-2"
           placeholder="Title of your post"
           value={title}

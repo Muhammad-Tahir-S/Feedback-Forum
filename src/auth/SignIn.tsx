@@ -67,6 +67,7 @@ const SignIn = () => {
                   <Input
                     placeholder="name@example.com"
                     className="bg-input text-card-foreground border-border"
+                    autoComplete="username"
                     {...field}
                   />
                 </FormControl>
@@ -90,6 +91,7 @@ const SignIn = () => {
                     type="password"
                     placeholder="••••••••"
                     className="bg-input text-card-foreground border-border"
+                    autoComplete="current-password"
                     {...field}
                   />
                 </FormControl>
