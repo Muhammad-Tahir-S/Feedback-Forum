@@ -113,7 +113,13 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={0} align="start">
                 {tab.dropdownItems?.map((item, index) => (
-                  <Link key={index} to={item.path}>
+                  <Link
+                    key={index}
+                    to={{
+                      pathname: item.path,
+                      search: location.search,
+                    }}
+                  >
                     <DropdownMenuItem>
                       <span className="flex items-center space-x-2">
                         {item.icon && <span>{item.icon}</span>}
