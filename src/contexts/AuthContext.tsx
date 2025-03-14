@@ -24,13 +24,12 @@ type Board = Database['public']['Tables']['boards']['Row'];
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const localSession = localStorage.getItem(
+  const [localSession] = useLocalStorage<Session>(
     'sb-' + import.meta.env.VITE_SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token'
   );
-  const sessionData = localSession ? (JSON.parse(localSession) as Session) : null;
 
-  const [user, setUser] = useState<UserType | null>(sessionData?.user ? getUserFromSupabase(sessionData.user) : null);
-  const [session, setSession] = useState<Session | null>(sessionData || null);
+  const [user, setUser] = useState<UserType | null>(localSession?.user ? getUserFromSupabase(localSession.user) : null);
+  const [session, setSession] = useState<Session | null>(localSession || null);
   const [loading, setLoading] = useState(true);
   const [boards] = useLocalStorage<Board[] | null>('boards');
 
@@ -73,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (sessionData && !boards) {
+    if (localSession && !boards) {
       supabase
         .from('boards')
         .select()
@@ -83,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         });
     }
-  }, [sessionData, boards]);
+  }, [localSession, boards]);
 
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
@@ -136,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     setLoading(true);
     await supabase.auth.signOut();
+    localStorage.removeItem('boards');
 
     toast.info('Signed out', {
       description: 'You have been successfully signed out.',

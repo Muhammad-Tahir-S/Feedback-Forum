@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 
+import useGetBoardId from '@/hooks/useGetBoardId';
 import supabase from '@/lib/supabase';
 
 import { PostCard } from './PostCard';
 
-export default function PostsList({ boardId }: { boardId?: string }) {
+export default function PostsList() {
+  const { boardId } = useGetBoardId();
   const [searchParams] = useSearchParams();
   const sortBy = searchParams.get('sortBy') || 'comments_count';
 

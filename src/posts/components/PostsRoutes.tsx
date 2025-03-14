@@ -12,12 +12,10 @@ export default function PostRoutes() {
   return (
     <Routes>
       <Route path="/*" element={<PostsLayout />}>
-        {boards.map(({ label, path, id }) => {
-          return path === '/posts' ? (
-            <Route key={label} index element={<PostsList boardId={id} />} />
-          ) : (
-            <Route key={label} path={path.split('/').at(-1)} element={<PostsList boardId={id} />} />
-          );
+        <Route index element={<PostsList />} />
+
+        {boards.map(({ label, path }) => {
+          return <Route key={label} path={path.split('/').at(-1)} element={<PostsList />} />;
         })}
 
         <Route path="*" element={<NotFound />} />
