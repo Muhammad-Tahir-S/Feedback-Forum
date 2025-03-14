@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 type SortOption = 'trending' | 'top' | 'new';
 
-export function SortSelector() {
+export function SortSelector({ isSearchActive }: { isSearchActive: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const currentSort = searchParams.get('sortBy') || 'comments_count';
@@ -53,7 +53,10 @@ export function SortSelector() {
   const currentSortInfo = getSortLabel(currentSortOption);
 
   return (
-    <div className="flex" style={{ opacity: 1, display: 'flex' }}>
+    <div
+      className={cn('flex transition-all duration-300', isSearchActive ? '' : 'delay-400')}
+      style={{ opacity: isSearchActive ? 0 : 1, width: isSearchActive ? '0px' : 'fit-content' }}
+    >
       <div className="hidden gap-3 sm:flex">
         <SortButton
           label="Trending"
