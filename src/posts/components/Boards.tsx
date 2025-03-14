@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router';
+import { Link } from 'react-router';
 
 import { P } from '@/components/ui/typography';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
@@ -12,16 +12,17 @@ export default function Boards() {
     label: item.path === '/posts' ? 'View All Posts' : item.label,
   }));
 
-  const location = useLocation();
-
   return (
     <div className="w-full">
       <P className="mb-2 text-secondary-foreground">Boards</P>
       <div className="w-full flex flex-col gap-1">
         {boardItems.map(({ path, label, icon }) => (
-          <a
+          <Link
             key={path}
-            href={path}
+            to={{
+              pathname: path,
+              search: location.search,
+            }}
             className={cn(
               'flex items-center group hover:bg-secondary text-left w-full px-2 py-1.5 text-sm font-medium text-foreground rounded-[6px] hover:shadow-md border border-transparent hover:border-primary/40 transition-all duration-300',
               location.pathname === path ? 'bg-secondary shadow-md border-primary/40 ' : ''
@@ -31,7 +32,7 @@ export default function Boards() {
               {icon && <span>{icon}</span>}
               <span>{label}</span>
             </span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
