@@ -1,17 +1,27 @@
-import { Database } from 'database.types';
 import { useState } from 'react';
+import { Link } from 'react-router';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
 import { formatRelativeTime } from '@/lib/utils';
+import { PostWithUser } from '@/posts/types';
 
-type Post = Database['public']['Tables']['posts']['Row'];
-
-export const PostCard = ({ id, title, status, user_id, votes_count, board, created_at, is_pinned }: Post) => {
+export const PostCard = ({
+  id,
+  title,
+  status,
+  user,
+  votes_count,
+  board,
+  created_at,
+  is_pinned,
+  comments_count,
+}: PostWithUser) => {
   const { boards } = useGetBoardItems();
 
   const postBoard = boards.find((b) => b?.id === board);
-  // Status badge styles
-  const statusStyles: { [k in Post['status']]: string } = {
+
+  const statusStyles: { [k in NonNullable<PostWithUser['status']>]: string } = {
     in_progress: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/10',
     planned: 'bg-purple-500/10 text-purple-500 border-purple-500/10',
     completed: 'bg-green-500/10 text-green-500 border-green-500/10',
@@ -20,7 +30,7 @@ export const PostCard = ({ id, title, status, user_id, votes_count, board, creat
     closed: 'bg-blue-500/10 text-blue-500 border-blue-500/10',
   };
 
-  const statusText: { [k in Post['status']]: string } = {
+  const statusText: { [k in NonNullable<PostWithUser['status']>]: string } = {
     in_progress: 'In Progress',
     planned: 'Planned',
     completed: 'Completed',
@@ -31,17 +41,13 @@ export const PostCard = ({ id, title, status, user_id, votes_count, board, creat
 
   const [isUpvoted, setIsUpvoted] = useState(false);
 
-  const authorName = user_id;
-  const authorAvatar = '';
-
   return (
     <div className="relative flex w-full pr-0 duration-75 ease-in hover:bg-accent/10">
-      <a
+      <Link
         aria-label={`View post ${title}`}
         role="button"
-        className="hidden w-full h-full min-w-0 py-4 pl-4 pr-3 my-auto overflow-auto rounded-md cursor-pointer sm:block sm:pl-5 sm:py-5"
-        href={`/posts/${id}`}
-        // onClick={onClick}
+        className="w-full h-full min-w-0 py-4 px-4 pr-3 my-auto overflow-auto rounded-md cursor-pointer sm:px-5 sm:py-5"
+        to={`/posts/${id}`}
       >
         <div className="relative">
           {is_pinned && (
@@ -123,57 +129,41 @@ export const PostCard = ({ id, title, status, user_id, votes_count, board, creat
                   </svg>
                   <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-full h-5 w-5">
                     <div className="absolute inset-0 bg-secondary/70" style={{ mask: `url(#avatar-mask-${id})` }}></div>
-                    {authorAvatar ? (
+                    {user?.avatar_url ? (
                       <img
                         className="object-cover rounded-full h-full w-full z-10"
-                        src={authorAvatar}
-                        alt={authorName}
+                        src={user?.avatar_url}
+                        alt={user?.username || user?.email}
                         style={{
                           borderRadius: '100%',
                           mask: `url(#avatar-mask-${id})`,
                         }}
                       />
-                    ) : null}
-                    {/* {isAuthorVerified && (
-                      <div className="absolute z-10 top-0 right-0">
-                        <div className="h-3.5 w-3.5 -m-1 z-20 right-0 absolute">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                            className="text-primary"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                              clipRule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      </div>
-                    )} */}
+                    ) : (
+                      <Avatar>
+                        <AvatarImage src={user?.avatar_url} alt="user-avatar" />
+                        <AvatarFallback>{user?.username?.slice(0, 1)}</AvatarFallback>
+                      </Avatar>
+                    )}
                   </div>
                 </div>
               </div>
               <p className="text-sm ml-1.5 text-muted-foreground">
-                <span className="font-medium">{authorName}</span>{' '}
-                <span className="text-xs font-medium ml-1.5 text-muted-foreground/70">
+                <span className="font-medium">{user?.username || user?.email}</span>{' '}
+                <span className="text-xs font-medium ml-1.5 text-muted-foreground/70 capitalize">
                   {formatRelativeTime(created_at)}
                 </span>
               </p>
             </div>
 
-            {/* Tags and comment count */}
             <div className="flex items-center space-x-2 -mb-[3px]">
-              {/* Comment count */}
               <div className="flex items-center px-2 py-1 text-xs font-medium text-muted-foreground rounded-md">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                   aria-hidden="true"
-                  className="w-3.5 h-3.5 mr-1 text-muted-foreground/50"
+                  className="w-3.5 h-3.5 mr-1 text-card-foreground/70"
                 >
                   <path
                     fillRule="evenodd"
@@ -181,10 +171,9 @@ export const PostCard = ({ id, title, status, user_id, votes_count, board, creat
                     clipRule="evenodd"
                   ></path>
                 </svg>
-                {'commentCount'}
+                {comments_count}
               </div>
 
-              {/* Tags */}
               <div className="px-2 py-0.5 truncate flex items-center text-muted-foreground text-xs font-medium border-border/70 bg-secondary rounded-md border">
                 {postBoard?.icon && (
                   <span className="mr-1 -ml-[2px]">
@@ -198,17 +187,7 @@ export const PostCard = ({ id, title, status, user_id, votes_count, board, creat
             </div>
           </div>
         </div>
-      </a>
-
-      {/* Mobile version (simplified) */}
-      <a
-        aria-label={`View post ${title}`}
-        className="w-full h-full min-w-0 py-4 pl-4 pr-3 my-auto overflow-auto rounded-md cursor-pointer sm:hidden"
-        href={`/p/${id}`}
-      >
-        {/* Same content structure as above but simplified for mobile */}
-        {/* ... Content identical to desktop version ... */}
-      </a>
+      </Link>
 
       {/* Upvote button */}
       <div className="flex">

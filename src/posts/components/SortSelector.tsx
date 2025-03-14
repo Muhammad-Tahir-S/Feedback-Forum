@@ -93,7 +93,7 @@ export function SortSelector() {
                 <DrawerDescription>Select how posts should be sorted.</DrawerDescription>
               </DrawerHeader>
 
-              <DrawerClose>
+              <DrawerClose asChild>
                 <button
                   className={`flex w-full items-center px-4 py-2 text-sm ${
                     currentSortOption === 'trending' ? 'bg-accent/10 text-primary' : 'text-foreground'
@@ -106,7 +106,7 @@ export function SortSelector() {
                 </button>
               </DrawerClose>
 
-              <DrawerClose>
+              <DrawerClose asChild>
                 <button
                   className={`flex w-full items-center px-4 py-2 text-sm ${
                     currentSortOption === 'top' ? 'bg-accent/10 text-primary' : 'text-foreground'
@@ -119,7 +119,7 @@ export function SortSelector() {
                 </button>
               </DrawerClose>
 
-              <DrawerClose>
+              <DrawerClose asChild>
                 <button
                   className={`flex w-full items-center px-4 py-2 text-sm ${
                     currentSortOption === 'new' ? 'bg-accent/10 text-primary' : 'text-foreground'

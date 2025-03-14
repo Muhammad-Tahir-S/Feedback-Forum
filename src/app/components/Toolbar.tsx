@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 
-import UserAvatar from '@/components/Avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { H3 } from '@/components/ui/typography';
+import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ToolBar() {

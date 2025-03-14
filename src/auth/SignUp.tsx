@@ -62,6 +62,7 @@ const SignUp: React.FC = () => {
                   <Input
                     placeholder="name@example.com"
                     className="bg-input text-card-foreground border-border"
+                    autoComplete="email"
                     {...field}
                   />
                 </FormControl>
@@ -77,7 +78,12 @@ const SignUp: React.FC = () => {
               <FormItem>
                 <FormLabel className="text-card-foreground">Username</FormLabel>
                 <FormControl>
-                  <Input placeholder="Username" className="bg-input text-card-foreground border-border" {...field} />
+                  <Input
+                    placeholder="Username"
+                    className="bg-input text-card-foreground border-border"
+                    autoComplete="username"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -94,6 +100,7 @@ const SignUp: React.FC = () => {
                     type="password"
                     placeholder="••••••••"
                     className="bg-input text-card-foreground border-border"
+                    autoComplete="current-password"
                     {...field}
                   />
                 </FormControl>
@@ -112,6 +119,7 @@ const SignUp: React.FC = () => {
                     type="password"
                     placeholder="••••••••"
                     className="bg-input text-card-foreground border-border"
+                    autoComplete="confirm-password"
                     {...field}
                   />
                 </FormControl>
