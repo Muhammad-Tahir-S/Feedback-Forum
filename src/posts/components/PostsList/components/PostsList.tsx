@@ -13,7 +13,7 @@ export default function PostsList() {
   const sortBy = searchParams.get('sortBy') || 'comments_count';
   const searchQuery = searchParams.get('search') || '';
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['posts', boardId, sortBy, searchQuery],
     queryFn: async () => {
       let query = boardId
@@ -26,7 +26,7 @@ export default function PostsList() {
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
 
-      query = query.order(sortBy, { ascending: false });
+      query = query.order(sortBy, { ascending: false, nullsFirst: false });
 
       const res = await query;
       return res?.data as PostWithUser[];
@@ -40,7 +40,7 @@ export default function PostsList() {
       ) : data?.length ? (
         <div className="mt-4 overflow-hidden border-x rounded-lg bg-secondary/80 border-y border-primary/30">
           <div className="w-full divide-y divide-primary/30">
-            {data?.map((post) => <PostCard key={post.id} {...post} />)}
+            {data?.map((post) => <PostCard key={post.id} {...post} refetch={refetch} />)}
           </div>
         </div>
       ) : null}

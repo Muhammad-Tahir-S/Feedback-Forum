@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
+import supabase from '@/lib/supabase';
 import { formatRelativeTime } from '@/lib/utils';
 import { PostWithUser } from '@/posts/types';
 
@@ -10,14 +12,17 @@ export const PostCard = ({
   id,
   title,
   status,
-  user,
-  votes_count,
+  user: postUser,
+  votes,
   board,
   created_at,
   is_pinned,
   comments_count,
-}: PostWithUser) => {
+  votes_count,
+  refetch,
+}: PostWithUser & { refetch: VoidFunction }) => {
   const { boards } = useGetBoardItems();
+  const { user } = useAuth();
 
   const postBoard = boards.find((b) => b?.id === board);
 
@@ -39,7 +44,19 @@ export const PostCard = ({
     closed: 'Closed',
   };
 
-  const [isUpvoted, setIsUpvoted] = useState(false);
+  const isUpvoted = user?.id && votes?.includes(user?.id);
+
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ postId, userId }: { postId: string; userId: string }) => {
+      await supabase
+        .from('posts')
+        .update({ votes: !votes.includes(userId) ? [...votes, userId] : votes.filter((id) => id !== userId) })
+        .eq('id', postId);
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
   return (
     <div className="relative flex w-full pr-0 duration-75 ease-in hover:bg-accent/10">
@@ -129,11 +146,11 @@ export const PostCard = ({
                   </svg>
                   <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-full h-5 w-5">
                     <div className="absolute inset-0 bg-secondary/70" style={{ mask: `url(#avatar-mask-${id})` }}></div>
-                    {user?.avatar_url ? (
+                    {postUser?.avatar_url ? (
                       <img
                         className="object-cover rounded-full h-full w-full z-10"
-                        src={user?.avatar_url}
-                        alt={user?.username || user?.email}
+                        src={postUser?.avatar_url}
+                        alt={postUser?.username || postUser?.email}
                         style={{
                           borderRadius: '100%',
                           mask: `url(#avatar-mask-${id})`,
@@ -141,15 +158,15 @@ export const PostCard = ({
                       />
                     ) : (
                       <Avatar>
-                        <AvatarImage src={user?.avatar_url} alt="user-avatar" />
-                        <AvatarFallback>{user?.username?.slice(0, 1)}</AvatarFallback>
+                        <AvatarImage src={postUser?.avatar_url} alt="user-avatar" />
+                        <AvatarFallback>{postUser?.username?.slice(0, 1)}</AvatarFallback>
                       </Avatar>
                     )}
                   </div>
                 </div>
               </div>
               <p className="text-sm ml-1.5 text-muted-foreground">
-                <span className="font-medium">{user?.username || user?.email}</span>{' '}
+                <span className="font-medium">{postUser?.username || postUser?.email}</span>{' '}
                 <span className="text-xs font-medium ml-1.5 text-muted-foreground/70 capitalize">
                   {formatRelativeTime(created_at)}
                 </span>
@@ -193,7 +210,7 @@ export const PostCard = ({
       <div className="flex">
         <button
           aria-label={`${votes_count} upvotes. ${isUpvoted ? 'You upvoted this' : 'Click to upvote'}`}
-          onClick={() => setIsUpvoted((prev) => !prev)}
+          onClick={async () => await mutateAsync({ userId: user?.id || '', postId: id })}
           className="cursor-pointer flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in"
         >
           <div className="group-hover:text-foreground flex flex-col items-center justify-center pb-1 px-2 rounded-md">
@@ -213,7 +230,7 @@ export const PostCard = ({
                 clipRule="evenodd"
               ></path>
             </svg>
-            <p className="text-sm font-semibold text-foreground">{votes_count}</p>
+            <p className="text-sm font-semibold text-foreground">{votes?.length}</p>
           </div>
         </button>
       </div>

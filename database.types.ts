@@ -55,13 +55,6 @@ export type Database = {
             foreignKeyName: 'comments_post_id_fkey';
             columns: ['post_id'];
             isOneToOne: false;
-            referencedRelation: 'posts_with_user';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'comments_post_id_fkey';
-            columns: ['post_id'];
-            isOneToOne: false;
             referencedRelation: 'posts_with_users';
             referencedColumns: ['id'];
           },
@@ -81,6 +74,7 @@ export type Database = {
           status: Database['public']['Enums']['status'];
           title: string | null;
           user_id: string;
+          votes: string[];
           votes_count: number | null;
         };
         Insert: {
@@ -96,6 +90,7 @@ export type Database = {
           status?: Database['public']['Enums']['status'];
           title?: string | null;
           user_id: string;
+          votes?: string[];
           votes_count?: number | null;
         };
         Update: {
@@ -111,6 +106,7 @@ export type Database = {
           status?: Database['public']['Enums']['status'];
           title?: string | null;
           user_id?: string;
+          votes?: string[];
           votes_count?: number | null;
         };
         Relationships: [
@@ -154,13 +150,6 @@ export type Database = {
             foreignKeyName: 'votes_post_id_fkey1';
             columns: ['post_id'];
             isOneToOne: false;
-            referencedRelation: 'posts_with_user';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'votes_post_id_fkey1';
-            columns: ['post_id'];
-            isOneToOne: false;
             referencedRelation: 'posts_with_users';
             referencedColumns: ['id'];
           },
@@ -168,33 +157,6 @@ export type Database = {
       };
     };
     Views: {
-      posts_with_user: {
-        Row: {
-          board: string | null;
-          bug_sources: string[] | null;
-          comments_count: number | null;
-          created_at: string | null;
-          description: string | null;
-          id: string | null;
-          integrations: string[] | null;
-          is_pinned: boolean | null;
-          module: string | null;
-          status: Database['public']['Enums']['status'] | null;
-          title: string | null;
-          user: Json | null;
-          user_id: string | null;
-          votes_count: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'post_board_fkey';
-            columns: ['board'];
-            isOneToOne: false;
-            referencedRelation: 'boards';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       posts_with_users: {
         Row: {
           board: string | null;
@@ -210,6 +172,7 @@ export type Database = {
           title: string | null;
           user: Json | null;
           user_id: string | null;
+          votes: string[] | null;
           votes_count: number | null;
         };
         Relationships: [
