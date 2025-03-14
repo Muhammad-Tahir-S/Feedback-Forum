@@ -15,9 +15,7 @@ export default function PostsList() {
   const { data, isLoading } = useQuery({
     queryKey: ['posts', boardId, sortBy],
     queryFn: async () => {
-      let query = boardId
-        ? supabase.from('posts').select('*').eq('board', boardId)
-        : supabase.from('posts').select('*');
+      let query = supabase.from('posts_with_users').select('*');
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
 
@@ -33,7 +31,7 @@ export default function PostsList() {
       {isLoading ? (
         <Loader />
       ) : data?.length ? (
-        <div className="mt-4 -mx-4 overflow-hidden rounded-none border-x-0 sm:border-x sm:rounded-lg sm:mx-0 bg-secondary/80 border-y border-primary/30">
+        <div className="mt-4 overflow-hidden border-x rounded-lg bg-secondary/80 border-y border-primary/30">
           <div className="w-full divide-y divide-primary/30">
             {data?.map((post) => <PostCard key={post.id} {...post} />)}
           </div>
