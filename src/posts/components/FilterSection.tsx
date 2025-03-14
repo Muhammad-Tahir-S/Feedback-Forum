@@ -84,7 +84,7 @@ export default function FilterSection() {
             type="button"
             className={cn(
               'h-[34px] px-[10px] flex whitespace-nowrap rounded-md items-center cursor-pointer bg-transparent border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
-              isSearchActive ? 'border-primary/40 rounded-l-none w-[38px]' : 'border-primary/40 w-[91px]'
+              isSearchActive ? 'border-primary/40 rounded-l-none w-[38px]' : 'border-primary/40 w-[38px] sm:w-[91px]'
             )}
           >
             {!isSearchActive ? (
