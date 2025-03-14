@@ -11,13 +11,18 @@ export default function PostsList() {
   const { boardId } = useGetBoardId();
   const [searchParams] = useSearchParams();
   const sortBy = searchParams.get('sortBy') || 'comments_count';
+  const searchQuery = searchParams.get('search') || '';
 
   const { data, isLoading } = useQuery({
-    queryKey: ['posts', boardId, sortBy],
+    queryKey: ['posts', boardId, sortBy, searchQuery],
     queryFn: async () => {
       let query = boardId
         ? supabase.from('posts_with_users').select('*').eq('board', boardId)
         : supabase.from('posts_with_users').select('*');
+
+      if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
+      }
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
 
