@@ -31,7 +31,7 @@ export default function FilterSection() {
   };
 
   return (
-    <div className="flex justify-between gap-3 mt-4">
+    <div className="flex justify-between mt-4">
       <SortSelector isSearchActive={isSearchActive} />
 
       <div className="flex items-center justify-end w-full gap-3 ml-auto">
@@ -83,8 +83,10 @@ export default function FilterSection() {
             }}
             type="button"
             className={cn(
-              'h-[34px] px-[10px] flex whitespace-nowrap rounded-md items-center cursor-pointer bg-transparent border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
-              isSearchActive ? 'border-primary/40 rounded-l-none w-[38px]' : 'border-primary/40 w-[38px] sm:w-[91px]'
+              'h-[34px] justify-center flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
+              isSearchActive
+                ? 'border-primary/40 rounded-l-none w-[38px] bg-transparent pl-0'
+                : 'w-[38px] sm:w-[91px] bg-primary/80 hover:bg-primary border-accent px-[10px]'
             )}
           >
             {!isSearchActive ? (
@@ -98,7 +100,7 @@ export default function FilterSection() {
         </div>
       </div>
 
-      <div className="hidden lg:block">
+      <div className="hidden lg:block ml-3">
         <CreatePostButton />
       </div>
     </div>
