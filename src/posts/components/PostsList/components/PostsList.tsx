@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import useGetBoardId from '@/hooks/useGetBoardId';
 import supabase from '@/lib/supabase';
+import { PostWithUser } from '@/posts/types';
 
 import { PostCard } from './PostCard';
 
@@ -23,7 +24,7 @@ export default function PostsList() {
       query = query.order(sortBy, { ascending: false });
 
       const res = await query;
-      return res?.data;
+      return res?.data as PostWithUser[];
     },
   });
 
