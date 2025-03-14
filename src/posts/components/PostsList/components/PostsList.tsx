@@ -15,7 +15,9 @@ export default function PostsList() {
   const { data, isLoading } = useQuery({
     queryKey: ['posts', boardId, sortBy],
     queryFn: async () => {
-      let query = supabase.from('posts_with_users').select('*');
+      let query = boardId
+        ? supabase.from('posts_with_users').select('*').eq('board', boardId)
+        : supabase.from('posts_with_users').select('*');
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
 
