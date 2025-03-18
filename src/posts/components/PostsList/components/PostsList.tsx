@@ -38,10 +38,16 @@ export default function PostsList() {
       Object.entries(filters).forEach(([key, values]) => {
         if (values.length > 1) {
           if (key !== 'created_at') {
-            query = query.in(
-              key,
-              values.map((v) => (v.startsWith('not:') ? v.replace('not:', '') : v))
-            );
+            const notValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
+            const regularValues = values.filter((v) => !v.startsWith('not:'));
+
+            if (regularValues.length > 0) {
+              query = query.in(key, regularValues);
+            }
+
+            if (notValues.length > 0) {
+              query = query.not(key, 'in', `(${notValues})`);
+            }
           }
           return;
         }

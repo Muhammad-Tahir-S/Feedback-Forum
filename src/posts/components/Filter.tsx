@@ -33,7 +33,7 @@ export default function Filter() {
 
   return (
     <Popover open={selectedKey === 'created_at'} modal={false}>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <div className="h-[34px] w-[38px] relative shrink-0  ml-3 z-50">
           <DropdownMenu
             modal={false}
