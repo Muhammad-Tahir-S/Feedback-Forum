@@ -11,9 +11,9 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: P
   return (
     <DayPickerComp
       showOutsideDays={showOutsideDays}
-      className={cn('p-3 backdrop-blur-sm bg-card/80 text-card-foreground rounded-lg shadow-md', className)}
+      className={cn('p-3 backdrop-blur-sm bg-card/80 text-card-foreground rounded-lg shadow-md w-fit', className)}
       classNames={{
-        months: 'flex flex-col sm:flex-row gap-2',
+        months: 'flex flex-col sm:flex-row gap-2 w-fit',
         month: 'flex flex-col gap-4',
         caption: 'flex justify-center pt-1 relative items-center w-full text-muted-foreground',
         caption_label: 'text-sm font-medium',
