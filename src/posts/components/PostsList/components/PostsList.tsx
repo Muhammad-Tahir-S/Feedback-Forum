@@ -63,7 +63,7 @@ export default function PostsList() {
             ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
             : ['', value];
 
-            if (key === 'created_at') {
+        if (key === 'created_at') {
           const date = new Date(actualValue);
           const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).toISOString();
           const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
