@@ -159,10 +159,8 @@ function SortButton({
     <button
       onClick={onClick}
       className={cn(
-        'h-[34px] px-[10px] flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-300',
-        isSelected
-          ? 'bg-primary/80 border-accent hover:bg-primary'
-          : 'border-border  bg-sidebar-accent hover:bg-primary/40'
+        'h-[34px] px-[10px] flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-300 hover:bg-primary',
+        isSelected ? 'bg-primary/80 border-accent ' : 'border-border  bg-sidebar-accent'
       )}
     >
       {icon} {label} <span className="ml-auto">{endIcon}</span>

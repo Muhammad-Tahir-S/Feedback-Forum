@@ -12,6 +12,7 @@ function MainRoutes() {
   return (
     <MainLayout>
       <Routes>
+        <Route path="/" element={<Navigate to="/posts" />} />
         <Route path="posts/*" element={<PostRoutes />} />
 
         <Route path="*" element={<NotFound />} />

@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router';
 import { cn } from '@/lib/utils';
 
 import CreatePostButton from './CreatePostButton';
+import Filter from './Filter';
 import { SortSelector } from './SortSelector';
 
 export default function FilterSection() {
@@ -100,7 +101,9 @@ export default function FilterSection() {
         </div>
       </div>
 
-      <div className="hidden lg:block ml-3">
+      <Filter />
+
+      <div className="hidden lg:block lg:ml-3">
         <CreatePostButton />
       </div>
     </div>

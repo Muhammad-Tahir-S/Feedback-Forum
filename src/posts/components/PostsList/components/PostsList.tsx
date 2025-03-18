@@ -5,7 +5,19 @@ import useGetBoardId from '@/hooks/useGetBoardId';
 import supabase from '@/lib/supabase';
 import { PostWithUser } from '@/posts/types';
 
+import EmptyState from '../../EmptyState';
 import { PostCard } from './PostCard';
+
+const formatDateWithoutTimezone = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+};
 
 export default function PostsList() {
   const { boardId } = useGetBoardId();
@@ -13,8 +25,18 @@ export default function PostsList() {
   const sortBy = searchParams.get('sortBy') || 'comments_count';
   const searchQuery = searchParams.get('search') || '';
 
+  const filters = Array.from(searchParams.entries()).reduce(
+    (acc, [key, value]) => {
+      if (!['sortBy', 'search'].includes(key)) {
+        acc[key] = acc[key] ? [...acc[key], value] : [value];
+      }
+      return acc;
+    },
+    {} as Record<string, string[]>
+  );
+
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['posts', boardId, sortBy, searchQuery],
+    queryKey: ['posts', boardId, sortBy, searchQuery, filters],
     queryFn: async () => {
       let query = boardId
         ? supabase.from('posts_with_users').select('*').eq('board', boardId)
@@ -23,6 +45,64 @@ export default function PostsList() {
       if (searchQuery) {
         query = query.ilike('title', `%${searchQuery}%`);
       }
+
+      Object.entries(filters).forEach(([key, values]) => {
+        values.forEach((value) => {
+          const [operator, actualValue] =
+            value.startsWith('not:') ||
+            value.startsWith('on:') ||
+            value.startsWith('after:') ||
+            value.startsWith('on_or_after:') ||
+            value.startsWith('before:') ||
+            value.startsWith('on_or_before:')
+              ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
+              : ['on', value];
+
+          if (key === 'created_at') {
+            console.log({ key, value, operator });
+            const formattedValue = formatDateWithoutTimezone(new Date(value));
+            switch (operator) {
+              case 'on':
+                query = query.eq(key, formattedValue);
+                break;
+              case 'not':
+                query = query.neq(key, formattedValue);
+                break;
+              case 'after':
+                query = query.gt(key, formattedValue);
+                break;
+              case 'on_or_after':
+                query = query.gte(key, formattedValue);
+                break;
+              case 'before':
+                query = query.lt(key, formattedValue);
+                break;
+              case 'on_or_before':
+                query = query.lte(key, formattedValue);
+                break;
+            }
+          } else {
+            // Handle other filters
+            if (operator === 'not') {
+              query = query.not(key, 'in', `(${actualValue})`); // Properly format `not.in` with parentheses
+            } else {
+              query = query.in(key, [actualValue]);
+            }
+          }
+        });
+        // const isNotValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
+        // const isValues = values.filter((v) => !v.startsWith('not:'));
+
+        // if (key === 'custom_field') {
+        //   return;
+        // }
+        // if (isValues.length > 0) {
+        //   query = query.in(key, isValues);
+        // }
+        // if (isNotValues.length > 0) {
+        //   query = query.not(key, 'in', `(${isNotValues.join(',')})`);
+        // }
+      });
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
 
@@ -48,7 +128,11 @@ export default function PostsList() {
             {data?.map((post) => <PostCard key={post.id} {...post} refetch={refetch} />)}
           </div>
         </div>
-      ) : null}
+      ) : (
+        <EmptyState />
+      )}
+
+      <div className="mt-16"></div>
     </>
   );
 }
