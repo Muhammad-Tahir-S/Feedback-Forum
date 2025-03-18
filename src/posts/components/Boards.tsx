@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { P } from '@/components/ui/typography';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 export default function Boards() {
   const { boards } = useGetBoardItems();
-
+  const { pathname, search } = useLocation();
   const boardItems = boards.map((item) => ({
     ...item,
     label: item.path === '/posts' ? 'View All Posts' : item.label,
@@ -21,11 +21,11 @@ export default function Boards() {
             key={path}
             to={{
               pathname: path,
-              search: location.search,
+              search: search,
             }}
             className={cn(
               'flex items-center group hover:bg-secondary text-left w-full px-2 py-1.5 text-sm font-medium text-foreground rounded-[6px] hover:shadow-md border border-transparent hover:border-primary/40 transition-all duration-300',
-              location.pathname === path ? 'bg-secondary shadow-md border-primary/40 ' : ''
+              pathname === path ? 'bg-secondary shadow-md border-primary/40 ' : ''
             )}
           >
             <span className="flex items-center space-x-2">

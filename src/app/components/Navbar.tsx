@@ -21,8 +21,8 @@ type Tab = {
 };
 
 export default function Navbar() {
-  const location = useLocation();
-  const activePathname = location.pathname;
+  const { pathname } = useLocation();
+  const activePathname = pathname;
   const activePath = paths.find(({ pathname }) => pathname === activePathname);
 
   const { boards } = useGetBoardItems();
@@ -68,6 +68,8 @@ export default function Navbar() {
 }
 
 export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname: string }) {
+  const { search } = useLocation();
+
   return (
     <div className={cn('flex items-center mt-4 -mb-px space-x-1 overflow-x-auto scrollbar-none sm:space-x-5')}>
       {tabs.map((tab) => (
@@ -117,7 +119,7 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
                     key={index}
                     to={{
                       pathname: item.path,
-                      search: location.search,
+                      search: search,
                     }}
                   >
                     <DropdownMenuItem>
