@@ -59,8 +59,8 @@ export default function SelectedFilters() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <p className="px-2 border-x text-primary-foreground bg-sidebar-accent hover:bg-primary/80 cursor-pointer border-sidebar-accent-foreground/15 py-1.5 transition-all duration-200">
-                  {filter.operator}
+                <p className="px-2 border-x text-primary-foreground bg-sidebar-accent hover:bg-primary/80 cursor-pointer border-sidebar-accent-foreground/15 py-1.5 transition-all duration-200 capitalize">
+                  {filter.operator.split('_').join(' ')}
                 </p>
               </DropdownMenuTrigger>
               <DropdownMenuContent>

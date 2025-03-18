@@ -8,17 +8,6 @@ import { PostWithUser } from '@/posts/types';
 import EmptyState from '../../EmptyState';
 import { PostCard } from './PostCard';
 
-const formatDateWithoutTimezone = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-};
-
 export default function PostsList() {
   const { boardId } = useGetBoardId();
   const [searchParams] = useSearchParams();
@@ -47,6 +36,16 @@ export default function PostsList() {
       }
 
       Object.entries(filters).forEach(([key, values]) => {
+        if (values.length > 1) {
+          if (key !== 'created_at') {
+            query = query.in(
+              key,
+              values.map((v) => (v.startsWith('not:') ? v.replace('not:', '') : v))
+            );
+          }
+          return;
+        }
+
         values.forEach((value) => {
           const [operator, actualValue] =
             value.startsWith('not:') ||
@@ -59,49 +58,38 @@ export default function PostsList() {
               : ['on', value];
 
           if (key === 'created_at') {
-            console.log({ key, value, operator });
-            const formattedValue = formatDateWithoutTimezone(new Date(value));
+            const date = new Date(actualValue);
+            const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).toISOString();
+            const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
+
             switch (operator) {
               case 'on':
-                query = query.eq(key, formattedValue);
+                query = query.gte(key, startOfDay).lt(key, endOfDay);
                 break;
               case 'not':
-                query = query.neq(key, formattedValue);
+                query = query.not(key, 'gte', startOfDay).not(key, 'lt', endOfDay);
                 break;
               case 'after':
-                query = query.gt(key, formattedValue);
+                query = query.gt(key, endOfDay);
                 break;
               case 'on_or_after':
-                query = query.gte(key, formattedValue);
+                query = query.gte(key, startOfDay);
                 break;
               case 'before':
-                query = query.lt(key, formattedValue);
+                query = query.lt(key, startOfDay);
                 break;
               case 'on_or_before':
-                query = query.lte(key, formattedValue);
+                query = query.lt(key, endOfDay);
                 break;
             }
           } else {
-            // Handle other filters
             if (operator === 'not') {
-              query = query.not(key, 'in', `(${actualValue})`); // Properly format `not.in` with parentheses
+              query = query.not(key, 'in', `(${actualValue})`);
             } else {
               query = query.in(key, [actualValue]);
             }
           }
         });
-        // const isNotValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
-        // const isValues = values.filter((v) => !v.startsWith('not:'));
-
-        // if (key === 'custom_field') {
-        //   return;
-        // }
-        // if (isValues.length > 0) {
-        //   query = query.in(key, isValues);
-        // }
-        // if (isNotValues.length > 0) {
-        //   query = query.not(key, 'in', `(${isNotValues.join(',')})`);
-        // }
       });
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });

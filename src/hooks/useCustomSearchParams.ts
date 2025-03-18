@@ -21,18 +21,23 @@ export default function useCustomSearchParams() {
   const removeSearchParamValue = (key: FilterKey, value: string) => {
     const existingValues = searchParams.getAll(key);
 
-    const updatedValues = existingValues.filter(() => {
+    const updatedValues = existingValues.filter((v) => {
       const [_operator, actualValue] =
-        value.startsWith('not:') ||
-        value.startsWith('on:') ||
-        value.startsWith('after:') ||
-        value.startsWith('on_or_after:') ||
-        value.startsWith('before:') ||
-        value.startsWith('on_or_before:')
-          ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
-          : ['', value];
+        key === 'created_at'
+          ? value.startsWith('not:') ||
+            value.startsWith('on:') ||
+            value.startsWith('after:') ||
+            value.startsWith('on_or_after:') ||
+            value.startsWith('before:') ||
+            value.startsWith('on_or_before:')
+            ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
+            : ['', value]
+          : v.includes(':')
+            ? v.split(':')
+            : ['', v];
       return actualValue !== value;
     });
+    console.log({ updatedValues, value });
 
     if (updatedValues.length > 0) {
       searchParams.delete(key);
