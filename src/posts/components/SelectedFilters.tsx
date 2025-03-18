@@ -192,7 +192,6 @@ function DatePopover({ filter: { value } }: { filter: { key: FilterKey; value: s
                     ]
                   : ['', createdAtSearchParams || ''];
 
-              console.log('operator', operator);
               addSearchParam('created_at', `${operator}:${date?.toString() || ''}`, true);
             }
             setOpen(false);

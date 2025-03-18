@@ -37,7 +37,6 @@ export default function useCustomSearchParams() {
             : ['', v];
       return actualValue !== value;
     });
-    console.log({ updatedValues, value });
 
     if (updatedValues.length > 0) {
       searchParams.delete(key);
