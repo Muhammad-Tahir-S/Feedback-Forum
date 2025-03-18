@@ -36,11 +36,11 @@ export default function PostsList() {
       }
 
       Object.entries(filters).forEach(([key, values]) => {
+        console.log(values);
         if (values.length > 1) {
           if (key !== 'created_at') {
             const notValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
             const regularValues = values.filter((v) => !v.startsWith('not:'));
-
             if (regularValues.length > 0) {
               query = query.in(key, regularValues);
             }
@@ -52,50 +52,50 @@ export default function PostsList() {
           return;
         }
 
-        values.forEach((value) => {
-          const [operator, actualValue] =
-            value.startsWith('not:') ||
-            value.startsWith('on:') ||
-            value.startsWith('after:') ||
-            value.startsWith('on_or_after:') ||
-            value.startsWith('before:') ||
-            value.startsWith('on_or_before:')
-              ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
-              : ['on', value];
+        const value = values[0];
 
-          if (key === 'created_at') {
-            const date = new Date(actualValue);
-            const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).toISOString();
-            const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
+        const [operator, actualValue] =
+          value.startsWith('not:') ||
+          value.startsWith('on:') ||
+          value.startsWith('after:') ||
+          value.startsWith('on_or_after:') ||
+          value.startsWith('before:') ||
+          value.startsWith('on_or_before:')
+            ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
+            : ['', value];
+        console.log({ operator, actualValue });
+        if (key === 'created_at') {
+          const date = new Date(actualValue);
+          const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).toISOString();
+          const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
 
-            switch (operator) {
-              case 'on':
-                query = query.gte(key, startOfDay).lt(key, endOfDay);
-                break;
-              case 'not':
-                query = query.not(key, 'gte', startOfDay).not(key, 'lt', endOfDay);
-                break;
-              case 'after':
-                query = query.gt(key, endOfDay);
-                break;
-              case 'on_or_after':
-                query = query.gte(key, startOfDay);
-                break;
-              case 'before':
-                query = query.lt(key, startOfDay);
-                break;
-              case 'on_or_before':
-                query = query.lt(key, endOfDay);
-                break;
-            }
-          } else {
-            if (operator === 'not') {
-              query = query.not(key, 'in', `(${actualValue})`);
-            } else {
-              query = query.in(key, [actualValue]);
-            }
+          switch (operator) {
+            case 'on':
+              query = query.gte(key, startOfDay).lt(key, endOfDay);
+              break;
+            case 'not':
+              query = query.not(key, 'gte', startOfDay).not(key, 'lt', endOfDay);
+              break;
+            case 'after':
+              query = query.gt(key, endOfDay);
+              break;
+            case 'on_or_after':
+              query = query.gte(key, startOfDay);
+              break;
+            case 'before':
+              query = query.lt(key, startOfDay);
+              break;
+            case 'on_or_before':
+              query = query.lt(key, endOfDay);
+              break;
           }
-        });
+        } else {
+          if (operator === 'not') {
+            query = query.not(key, 'in', `(${actualValue})`);
+          } else {
+            query = query.in(key, [actualValue]);
+          }
+        }
       });
 
       query = query.order('is_pinned', { ascending: false, nullsFirst: false });
