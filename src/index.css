@@ -141,4 +141,9 @@
   .ProseMirror code {
     @apply font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded;
   }
+
+  p:empty::after {
+    content: '📝 [Empty Paragraph]';
+    visibility: hidden;
+  }
 }

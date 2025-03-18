@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,42 +7,27 @@ import useGetBoardItems from '@/hooks/useGetBoardItems';
 import supabase from '@/lib/supabase';
 import { formatRelativeTime } from '@/lib/utils';
 import { PostWithUser } from '@/posts/types';
+import { statusStyles, statusText } from '@/posts/utils/status';
 
-export const PostCard = ({
-  id,
-  title,
-  status,
-  user: postUser,
-  votes,
-  board,
-  created_at,
-  is_pinned,
-  comments_count,
-  votes_count,
-  refetch,
-}: PostWithUser & { refetch: VoidFunction }) => {
+export const PostCard = (post: PostWithUser & { refetch: VoidFunction }) => {
+  const {
+    id,
+    title,
+    status,
+    user: postUser,
+    votes,
+    board,
+    created_at,
+    is_pinned,
+    comments_count,
+    votes_count,
+    refetch,
+  } = post;
   const { boards } = useGetBoardItems();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const postBoard = boards.find((b) => b?.id === board);
-
-  const statusStyles: { [k in NonNullable<PostWithUser['status']>]: string } = {
-    in_progress: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/10',
-    planned: 'bg-purple-500/10 text-purple-500 border-purple-500/10',
-    completed: 'bg-green-500/10 text-green-500 border-green-500/10',
-    pending: 'bg-gray-500/10 text-gray-500 border-gray-500/10',
-    rejected: 'bg-red-500/10 text-red-500 border-red-500/10',
-    closed: 'bg-blue-500/10 text-blue-500 border-blue-500/10',
-  };
-
-  const statusText: { [k in NonNullable<PostWithUser['status']>]: string } = {
-    in_progress: 'In Progress',
-    planned: 'Planned',
-    completed: 'Completed',
-    pending: 'Pending',
-    rejected: 'Rejected',
-    closed: 'Closed',
-  };
 
   const isUpvoted = user?.id && votes?.includes(user?.id);
 
@@ -60,11 +45,11 @@ export const PostCard = ({
 
   return (
     <div className="relative flex w-full pr-0 duration-75 ease-in hover:bg-accent/10">
-      <Link
+      <div
         aria-label={`View post ${title}`}
         role="button"
         className="w-full h-full min-w-0 py-4 px-4 pr-3 my-auto overflow-auto rounded-md cursor-pointer sm:px-5 sm:py-5"
-        to={`/posts/${id}`}
+        onClick={() => navigate(`/posts/${id}`, { state: JSON.stringify(post) })}
       >
         <div className="relative">
           {is_pinned && (
@@ -93,7 +78,6 @@ export const PostCard = ({
             </div>
           )}
 
-          {/* Status badge */}
           <div className="inline-block mb-2">
             <p
               className={`px-2 py-0.5 flex items-center text-xs font-medium rounded-md border pointer-events-none ${
@@ -104,13 +88,10 @@ export const PostCard = ({
             </p>
           </div>
 
-          {/* Post title */}
           <p className="text-base font-semibold line-clamp-2 text-foreground">{title}</p>
 
-          {/* Author info and metadata */}
           <div className="flex flex-wrap items-end justify-between gap-3 pt-3.5">
             <div className="flex items-center mr-2">
-              {/* Avatar */}
               <div className="relative flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full">
                 <div className="relative rounded-full">
                   <svg
@@ -204,7 +185,7 @@ export const PostCard = ({
             </div>
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* Upvote button */}
       <div className="flex">
@@ -212,7 +193,7 @@ export const PostCard = ({
           aria-label={`${votes_count} upvotes. ${isUpvoted ? 'You upvoted this' : 'Click to upvote'}`}
           onClick={async () => await mutateAsync({ userId: user?.id || '', postId: id })}
           disabled={isPending}
-          className="cursor-pointer flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in disabled:cursor-not-allowed disabled:opacity-70"
+          className="cursor-pointer group flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in disabled:cursor-not-allowed disabled:opacity-70"
         >
           <div className="group-hover:text-foreground flex flex-col items-center justify-center pb-1 px-2 rounded-md">
             <svg
@@ -221,7 +202,7 @@ export const PostCard = ({
               fill="currentColor"
               aria-hidden="true"
               aria-label={isUpvoted ? 'Remove upvote' : 'Upvote'}
-              className={`flex-shrink-0 w-6 h-6 hover:-translate-y-0.5 cursor-pointer transition-transform ${
+              className={`flex-shrink-0 w-6 h-6 group-hover:-translate-y-0.5 cursor-pointer transition-transform ${
                 isUpvoted ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
