@@ -9,7 +9,7 @@ export default function EmptyState() {
             <div className="relative flex flex-col items-center justify-center mt-8 mb-12 space-y-6">
               <div className="flex flex-col items-center justify-center text-center">
                 <h2 className="pt-12 font-semibold text-white">No Submissions Yet</h2>
-                <p className="max-w-xs mt-2 text-gray-400 dark:text-foreground">
+                <p className="max-w-xs mt-2  mb-4 text-gray-400 dark:text-foreground">
                   If you would like to say something click the button below to join the conversation.
                 </p>
                 <CreatePostButton />
