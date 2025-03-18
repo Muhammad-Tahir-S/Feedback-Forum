@@ -36,7 +36,6 @@ export default function PostsList() {
       }
 
       Object.entries(filters).forEach(([key, values]) => {
-        console.log(values);
         if (values.length > 1) {
           if (key !== 'created_at') {
             const notValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
@@ -63,14 +62,14 @@ export default function PostsList() {
           value.startsWith('on_or_before:')
             ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
             : ['', value];
-        console.log({ operator, actualValue });
-        if (key === 'created_at') {
+
+            if (key === 'created_at') {
           const date = new Date(actualValue);
           const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).toISOString();
           const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
 
           switch (operator) {
-            case 'on':
+            case '':
               query = query.gte(key, startOfDay).lt(key, endOfDay);
               break;
             case 'not':
