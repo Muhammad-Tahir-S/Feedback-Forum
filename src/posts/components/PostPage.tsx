@@ -13,6 +13,7 @@ import { cn, formatRelativeTime } from '@/lib/utils';
 
 import { PostWithUser } from '../types';
 import { statusStyles, statusText } from '../utils/status';
+import CommentsPage from './Comments';
 
 export default function PostPage() {
   const { id } = useParams();
@@ -66,6 +67,8 @@ export default function PostPage() {
           </div>
 
           <Description description={description || ''} />
+
+          <CommentsPage postId={id || ''} />
         </div>
 
         <div className="hidden md:block  pb-2 text-sm md:border-l border-accent md:w-4/12 text-foreground relative rounded-tr-lg">
@@ -77,11 +80,7 @@ export default function PostPage() {
 }
 
 function PostInfo({ post, refetch }: { post: PostWithUser | undefined; refetch: VoidFunction }) {
-  if (!post) {
-    return null;
-  }
-
-  const { status, board, created_at, votes_count, user: postUser, votes, id } = post;
+  const { status, board, created_at, votes_count, user: postUser, votes, id } = post || {};
   const Label = ({ label }: { label: string }) => <P className="col-span-2 font-medium truncate">{label}</P>;
   const Value = ({ children }: { children: ReactNode }) => <div className="col-span-3">{children}</div>;
 
@@ -98,7 +97,7 @@ function PostInfo({ post, refetch }: { post: PostWithUser | undefined; refetch: 
     mutationFn: async ({ postId, userId }: { postId: string; userId: string }) => {
       await supabase
         .from('posts')
-        .update({ votes: !votes.includes(userId) ? [...votes, userId] : votes.filter((id) => id !== userId) })
+        .update({ votes: votes && !votes.includes(userId) ? [...votes, userId] : votes?.filter((id) => id !== userId) })
         .eq('id', postId);
     },
     onSuccess: () => {
@@ -118,7 +117,7 @@ function PostInfo({ post, refetch }: { post: PostWithUser | undefined; refetch: 
               'h-[34px] px-[10px] flex gap-1 whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-300 hover:bg-primary/30 border-border  bg-sidebar-accent'
             )}
             disabled={isPending}
-            onClick={async () => await mutateAsync({ userId: postUser?.id || '', postId: id })}
+            onClick={async () => await mutateAsync({ userId: postUser?.id || '', postId: id || '' })}
           >
             <ChevronUp className={cn('size-4', isUpvoted ? 'text-primary' : 'text-secondary-foreground')} />
             {votes_count || 0}
@@ -128,10 +127,10 @@ function PostInfo({ post, refetch }: { post: PostWithUser | undefined; refetch: 
           <div className="inline-block">
             <p
               className={`px-2 py-0.5 flex items-center text-xs font-medium rounded-md border pointer-events-none ${
-                statusStyles[status]
+                statusStyles[status || 'pending']
               }`}
             >
-              {statusText[status]}
+              {statusText[status || 'pending']}
             </p>
           </div>
         </Row>
@@ -151,7 +150,7 @@ function PostInfo({ post, refetch }: { post: PostWithUser | undefined; refetch: 
       </div>
       <div className="grid items-center grid-cols-5 py-3 md:p-4 border-b gap-y-4 border-accent">
         <Row label="Date">
-          <Label label={formatRelativeTime(created_at)} />
+          <Label label={created_at ? formatRelativeTime(created_at) : ''} />
         </Row>
         <Row label="Author">
           <div className="flex gap-2 items-center">

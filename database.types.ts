@@ -26,6 +26,7 @@ export type Database = {
           content: string | null;
           created_at: string;
           id: string;
+          parent_comment_id: string | null;
           post_id: string;
           user_id: string;
         };
@@ -33,6 +34,7 @@ export type Database = {
           content?: string | null;
           created_at?: string;
           id?: string;
+          parent_comment_id?: string | null;
           post_id?: string;
           user_id: string;
         };
@@ -40,6 +42,7 @@ export type Database = {
           content?: string | null;
           created_at?: string;
           id?: string;
+          parent_comment_id?: string | null;
           post_id?: string;
           user_id?: string;
         };
@@ -157,6 +160,33 @@ export type Database = {
       };
     };
     Views: {
+      comments_with_users: {
+        Row: {
+          content: string | null;
+          created_at: string | null;
+          id: string | null;
+          parent_comment_id: string | null;
+          post_id: string | null;
+          user: Json | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'comments_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts_with_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       posts_with_users: {
         Row: {
           board: string | null;
