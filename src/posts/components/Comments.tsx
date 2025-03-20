@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Placeholder from '@tiptap/extension-placeholder';
 import { Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { SendHorizonal } from 'lucide-react';
+import { Reply, SendHorizonal } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,7 +17,7 @@ interface Props {
   postId: string;
 }
 
-const CommentsPage: React.FC<Props> = ({ postId }) => {
+const CommentsSection: React.FC<Props> = ({ postId }) => {
   const queryClient = useQueryClient();
   const [replyTo, setReplyTo] = useState<string | null>(null);
 
@@ -50,13 +51,23 @@ const CommentsPage: React.FC<Props> = ({ postId }) => {
   });
 
   const newCommentEditor = useEditor({
-    extensions: [StarterKit],
-    content: '',
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Start writing a comment...',
+      }),
+    ],
+    // content: '',
   });
 
   const replyEditor = useEditor({
-    extensions: [StarterKit],
-    content: '',
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Start writing a comment...',
+      }),
+    ],
+    // content: '',
   });
   const editorContent = newCommentEditor?.getHTML()?.trim();
 
@@ -73,18 +84,41 @@ const CommentsPage: React.FC<Props> = ({ postId }) => {
 
   // const renderComments = ({ comments, parentId = null }: { comments: CommentWithUser[]; parentId: string | null }) => {
 
+  const getCommentDepth = (commentId: string | null, comments: CommentWithUser[]): number => {
+    let depth = 0;
+    let currentComment = comments.find((comment) => comment.id === commentId);
+
+    while (currentComment?.parent_comment_id) {
+      depth++;
+      currentComment = comments.find((comment) => comment.id === currentComment?.parent_comment_id);
+    }
+
+    return depth;
+  };
   const renderComments = ({ comments, parentId = null }: { comments: CommentWithUser[]; parentId: string | null }) => {
     const childComments = comments.filter((comment) => comment.parent_comment_id === parentId);
 
-    // If there are no child comments, stop recursion
     if (childComments.length === 0) {
       return null;
     }
 
     return childComments.map((comment) => {
+      const commentDepth = getCommentDepth(comment.id, comments);
       return (
-        <div key={comment.id} className="mt-4">
-          <div className="flex items-start space-x-4">
+        <div key={comment.id} className="mt-4 relative">
+          {parentId === null ? <div className="absolute left-[15px] h-full w-[1px] bg-primary"></div> : null}
+
+          <div className="flex items-start space-x-2">
+            {parentId ? (
+              <div
+                className="absolute mt-[15px] h-[1px] bg-primary"
+                style={{
+                  width: `${48 * commentDepth}px`,
+                  left: `-${32 * commentDepth + (commentDepth > 1 ? commentDepth * 8 : 0)}px`,
+                }}
+              ></div>
+            ) : null}
+
             {comment?.user?.avatar_url ? (
               <img
                 src={comment?.user?.avatar_url || '/default-avatar.png'}
@@ -97,16 +131,23 @@ const CommentsPage: React.FC<Props> = ({ postId }) => {
                 <AvatarFallback>{comment?.user?.username?.slice(0, 1)}</AvatarFallback>
               </Avatar>
             )}
-            <div className="flex-1">
-              <div className="flex items-center space-x-2">
-                <span className="font-semibold text-primary">{comment?.user?.username || comment?.user?.email}</span>
-                <span className="text-gray-400 text-sm">{formatRelativeTime(comment.created_at)}</span>
+
+            <div className="flex-1 z-10">
+              <div className="flex items-end space-x-2  mt-1.5">
+                <span className="font-semibold text-sm text-white">
+                  {comment?.user?.username || comment?.user?.email}
+                </span>
+                <span className="text-gray-400 text-xs">{formatRelativeTime(comment.created_at)}</span>
               </div>
-              <div className="mt-2 text-gray-400" dangerouslySetInnerHTML={{ __html: comment?.content || '' }} />
+              <div
+                className="mt-2 text-gray-300 text-md"
+                dangerouslySetInnerHTML={{ __html: comment?.content || '' }}
+              />
               <button
-                className="mt-2 text-sm text-accent-foreground hover:underline"
+                className="mt-2 text-xs text-gray-400 hover:bg-primary/30 px-1 py-0.5 transition-all duration-200 flex  rounded-sm items-center gap-1 cursor-pointer"
                 onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
               >
+                <Reply className="size-4" />
                 Reply
               </button>
 
@@ -123,7 +164,7 @@ const CommentsPage: React.FC<Props> = ({ postId }) => {
             </div>
           </div>
 
-          <div className="ml-12">{renderComments({ comments, parentId: comment.id })}</div>
+          <div className="ml-12 ">{renderComments({ comments, parentId: comment.id })}</div>
         </div>
       );
     });
@@ -137,22 +178,22 @@ const CommentsPage: React.FC<Props> = ({ postId }) => {
         isCommenting={isPending}
         isReply={false}
       />
-      <div className="p-6 ">
-        <h1 className="text-xl font-bold">Comments</h1>
+      <div className="py-6 ">
+        <h1 className="text-l font-bold text-gray-300 border-b-[1.5px] border-gray-500 w-fit pb-2">Comments</h1>
 
         {isLoading ? (
           <p>Loading comments...</p>
         ) : comments?.length ? (
           <div>{renderComments({ comments, parentId: null })}</div>
         ) : (
-          <div className="mt-6 text-muted">No comments yet.</div>
+          <div className="mt-4 text-sm text-gray-400">No comments yet.</div>
         )}
       </div>
     </>
   );
 };
 
-export default CommentsPage;
+export default CommentsSection;
 
 function CommentEditor({
   editor,
@@ -168,13 +209,13 @@ function CommentEditor({
   return (
     <div
       className={cn(
-        'px-[12px] py-[8px] bg-border border-2 text-[15px] min-h-[110px] relative transition-all duration-200 rounded-[8px] flex flex-col',
+        'px-[12px] py-[8px] bg-border border-2 text-[15px] min-h-[110px] relative transition-all duration-200 rounded-[8px] flex flex-col mt-4',
         editor?.isFocused ? ' border-primary' : 'border-transparent'
       )}
     >
       <div className="flex flex-1 min-h-0 w-full">
         <div className="relative flex flex-col flex-1 h-full w-full">
-          {editor ? <EditorContent editor={editor} className=" rounded-md" /> : null}
+          {editor ? <EditorContent editor={editor} className="rounded-md" /> : null}
         </div>
       </div>
 

@@ -13,7 +13,7 @@ import { cn, formatRelativeTime } from '@/lib/utils';
 
 import { PostWithUser } from '../types';
 import { statusStyles, statusText } from '../utils/status';
-import CommentsPage from './Comments';
+import CommentsSection from './Comments';
 
 export default function PostPage() {
   const { id } = useParams();
@@ -68,7 +68,7 @@ export default function PostPage() {
 
           <Description description={description || ''} />
 
-          <CommentsPage postId={id || ''} />
+          <CommentsSection postId={id || ''} />
         </div>
 
         <div className="hidden md:block  pb-2 text-sm md:border-l border-accent md:w-4/12 text-foreground relative rounded-tr-lg">

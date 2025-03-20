@@ -106,7 +106,7 @@
 
   .ProseMirror p.is-editor-empty:first-child::after {
     content: attr(data-placeholder);
-    @apply text-muted-foreground/60 float-left h-0 pointer-events-none;
+    @apply text-muted-foreground/60 float-left h-0 pointer-events-none absolute top-0;
   }
 
   .ProseMirror p {
