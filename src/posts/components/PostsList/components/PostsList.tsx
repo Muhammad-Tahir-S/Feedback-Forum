@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import Loader from '@/components/Loader';
 import useGetBoardId from '@/hooks/useGetBoardId';
+import useGetFilterOptions, { FilterKey } from '@/hooks/useGetFilterOptions';
 import supabase from '@/lib/supabase';
 import { PostWithUser } from '@/posts/types';
 
@@ -15,12 +16,17 @@ export default function PostsList() {
   const [searchParams] = useSearchParams();
   const sortBy = searchParams.get('sortBy') || 'comments_count';
   const searchQuery = searchParams.get('search') || '';
+  const { options } = useGetFilterOptions();
 
   const pageSize = 6;
 
   const filters = Array.from(searchParams.entries()).reduce(
     (acc, [key, value]) => {
       if (!['sortBy', 'search'].includes(key)) {
+        const filterKey = key as FilterKey;
+        if (filterKey === 'custom_field' && options.custom_field.options?.map((op) => op.value).includes(value)) {
+          return acc;
+        }
         acc[key] = acc[key] ? [...acc[key], value] : [value];
       }
       return acc;
@@ -124,6 +130,7 @@ export default function PostsList() {
       return lastPage.length === pageSize ? allPages.length : undefined;
     },
     initialPageParam: 0,
+    refetchOnWindowFocus: false,
   });
 
   const observerRef = useRef<HTMLDivElement | null>(null);

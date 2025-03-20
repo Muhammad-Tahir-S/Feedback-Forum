@@ -1,6 +1,6 @@
 import { formatDate } from 'date-fns';
 import { X as CloseIcon } from 'lucide-react';
-import { useState } from 'react';
+import { ComponentProps, useState } from 'react';
 
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -12,6 +12,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import useCustomSearchParams from '@/hooks/useCustomSearchParams';
 import useGetFilterOptions, { FilterKey } from '@/hooks/useGetFilterOptions';
+
+import { badgeOptions, integrationOptions, moduleOptions } from '../utils/options';
+import SearchDropdownContent from './CreatePostButton/SearchDropdownContent';
 
 export default function SelectedFilters() {
   const { searchParams, removeSearchParamValue, updateSearchParamOperator } = useCustomSearchParams();
@@ -56,7 +59,11 @@ export default function SelectedFilters() {
           >
             <p className="flex items-center text-primary-foreground bg-sidebar-accent capitalize px-2 py-1.5">
               {options[filter.key]?.icon}
-              <span>{options[filter.key]?.label}</span>
+              <span>
+                {filter.key === 'custom_field'
+                  ? options.custom_field.options?.find((opt) => opt.value === filter.value)?.label
+                  : options[filter.key]?.label}
+              </span>
             </p>
 
             <DropdownMenu>
@@ -134,10 +141,11 @@ export default function SelectedFilters() {
 
             {filter.key === 'created_at' ? (
               <DatePopover filter={filter} />
+            ) : filter.key === 'custom_field' ? (
+              <CustomFieldDropdown filter={filter} />
             ) : (
               <div className="border-r border-sidebar-accent-foreground/15 shrink-0 min-w-fit">
                 <p className="inline-flex items-center px-2  border-sidebar-accent-foreground/15 py-1.5 text-primary-foreground bg-sidebar-accent">
-                  {/* cursor-pointer hover:bg-primary/80 transition-all duration-200 */}
                   {filter.key === 'board'
                     ? options[filter?.key].options?.find((opt) => opt.value === filter?.value)?.label
                     : filter.value}
@@ -200,5 +208,36 @@ function DatePopover({ filter: { value } }: { filter: { key: FilterKey; value: s
         />
       </PopoverContent>
     </Popover>
+  );
+}
+
+function CustomFieldDropdown({
+  filter: { value, key },
+}: {
+  filter: { key: FilterKey; value: string; operator: string };
+}) {
+  const { searchParams, addSearchParam: _aS } = useCustomSearchParams();
+  const { options } = useGetFilterOptions();
+
+  const customFieldSearchParams = searchParams.get('custom_field');
+  const [open, setOpen] = useState(false);
+
+  const dropdownItems: Record<
+    'module' | 'bug_sources' | 'integrations',
+    ComponentProps<typeof SearchDropdownContent>['items']
+  > = { bug_sources: badgeOptions, module: moduleOptions, integrations: integrationOptions };
+
+  console.log({ value, key, customFieldSearchParams, items: dropdownItems[value as keyof typeof dropdownItems] });
+  return (
+    <DropdownMenu open={open} onOpenChange={(open) => setOpen(open)}>
+      <DropdownMenuTrigger>
+        <div className="border-r border-sidebar-accent-foreground/15 shrink-0 min-w-fit">
+          <p className="inline-flex items-center px-2  border-sidebar-accent-foreground/15 py-1.5 text-primary-foreground bg-sidebar-accent cursor-pointer hover:bg-primary/80 transition-all duration-200">
+            {options.custom_field.options?.map((op) => op.value).includes(value) ? 'Not Selected' : value}
+          </p>
+        </div>
+      </DropdownMenuTrigger>
+      <SearchDropdownContent items={dropdownItems[value as keyof typeof dropdownItems]} onSelect={() => {}} />
+    </DropdownMenu>
   );
 }

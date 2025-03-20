@@ -7,11 +7,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import useCustomSearchParams from '@/hooks/useCustomSearchParams';
-import useGetFilterOptions from '@/hooks/useGetFilterOptions';
+import useGetFilterOptions, { FilterKey } from '@/hooks/useGetFilterOptions';
 
 import SearchDropdownContent from './CreatePostButton/SearchDropdownContent';
-
-type FilterKey = 'board' | 'status' | 'created_at' | 'custom_field';
 
 export default function Filter() {
   const { searchParams, addSearchParam, isValueInSearchParams, removeSearchParamValue } = useCustomSearchParams();
