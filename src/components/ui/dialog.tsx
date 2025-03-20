@@ -52,6 +52,7 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
                 className
               )}
               {...props}
+              aria-describedby={undefined}
             >
               {children}
             </DialogPrimitive.Content>

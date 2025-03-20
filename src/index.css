@@ -87,9 +87,9 @@
     @apply bg-background text-foreground;
   }
   .editor-btn {
-    @apply flex items-center justify-center w-8 h-8 rounded-md 
-         text-muted-foreground transition-colors
-         hover:bg-gray-100/40 dark:hover:bg-white/5;
+    @apply flex items-center justify-center size-7 rounded-md 
+         text-muted-foreground transition-colors cursor-pointer
+         hover:bg-white/5 hover:text-white;
   }
 
   .editor-icon {
@@ -101,12 +101,12 @@
   }
 
   .ProseMirror {
-    @apply outline-none w-full;
+    @apply outline-none w-full transition-all duration-150;
   }
 
   .ProseMirror p.is-editor-empty:first-child::after {
     content: attr(data-placeholder);
-    @apply text-muted-foreground/60 float-left h-0 pointer-events-none;
+    @apply text-muted-foreground/60 float-left h-0 pointer-events-none absolute top-0;
   }
 
   .ProseMirror p {
@@ -138,7 +138,12 @@
     @apply italic;
   }
 
-  .ProseMirror code {
-    @apply font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded;
+  .ProseMirror pre {
+    @apply font-mono bg-gray-600 px-1  rounded-md;
+  }
+
+  p:empty::after {
+    content: '📝 [Empty Paragraph]';
+    visibility: hidden;
   }
 }

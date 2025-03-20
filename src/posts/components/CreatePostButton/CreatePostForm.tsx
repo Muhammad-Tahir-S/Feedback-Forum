@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
 import supabase from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { badgeOptions, integrationOptions, moduleOptions } from '@/posts/utils/options';
 
 import SearchDropdownContent from './SearchDropdownContent';
 import SelectDropdown from './SelectDropdown';
@@ -249,31 +250,6 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
   );
 }
 
-const moduleOptions: DropdownItem[] = [
-  { label: 'Feedback Portal', value: 'feedback_portal' },
-  { label: 'Widgets', value: 'widgets' },
-  { label: 'Changelog', value: 'changelog' },
-  { label: 'Roadmap', value: 'roadmap' },
-  { label: 'Help Center', value: 'help_center' },
-  { label: 'Surveys', value: 'surveys' },
-  { label: 'Other', value: 'other' },
-];
-
-const integrationOptions: DropdownItem[] = [
-  { label: 'New integration', value: 'new_integration' },
-  { label: 'Jira', value: 'jira' },
-  { label: 'Linear', value: 'linear' },
-  { label: 'ClickUp', value: 'clickup' },
-  { label: 'Intercom', value: 'intercom' },
-  { label: 'Zendesk', value: 'zendesk' },
-  { label: 'Slack', value: 'slack' },
-  { label: 'Discord', value: 'discord' },
-  { label: 'GitHub', value: 'github' },
-  { label: 'HubSpot', value: 'hubspot' },
-  { label: 'Segment', value: 'segment' },
-  { label: 'Azure DevOps', value: 'azure_devops' },
-];
-
 function BugBadge({
   label,
   value,
@@ -298,8 +274,3 @@ function BugBadge({
     </button>
   );
 }
-
-const badgeOptions = ['Dashboard', 'Widget', 'Integration', 'API', 'Other'].map((opt) => ({
-  label: opt,
-  value: opt.toLocaleLowerCase(),
-}));
