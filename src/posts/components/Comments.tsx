@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { Reply, SendHorizonal } from 'lucide-react';
 import React, { useState } from 'react';
 
+import Loader from '@/components/Loader';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -182,7 +183,7 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
         <h1 className="text-l font-bold text-gray-300 border-b-[1.5px] border-gray-500 w-fit pb-2">Comments</h1>
 
         {isLoading ? (
-          <p>Loading comments...</p>
+          <Loader />
         ) : comments?.length ? (
           <div>{renderComments({ comments, parentId: null })}</div>
         ) : (
