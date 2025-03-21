@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import Loader from '@/components/Loader';
+import { extractFilterOperatorAndValueFromSearchParamValue } from '@/hooks/useCustomSearchParams';
 import useGetBoardId from '@/hooks/useGetBoardId';
 import useGetFilterOptions, { FilterKey } from '@/hooks/useGetFilterOptions';
 import supabase from '@/lib/supabase';
@@ -46,8 +47,8 @@ export default function PostsList() {
     Object.entries(filters).forEach(([key, values]) => {
       if (values.length > 1) {
         if (key !== 'created_at') {
-          const notValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
-          const regularValues = values.filter((v) => !v.startsWith('not:'));
+          const notValues = values.filter((v) => v.startsWith('is_not:')).map((v) => v.replace('is_not:', ''));
+          const regularValues = values.filter((v) => !v.startsWith('is_not:'));
           if (regularValues.length > 0) {
             query = query.in(key, regularValues);
           }
@@ -61,15 +62,7 @@ export default function PostsList() {
 
       const value = values[0];
 
-      const [operator, actualValue] =
-        value.startsWith('not:') ||
-        value.startsWith('on:') ||
-        value.startsWith('after:') ||
-        value.startsWith('on_or_after:') ||
-        value.startsWith('before:') ||
-        value.startsWith('on_or_before:')
-          ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
-          : ['', value];
+      const { operator, actualValue } = extractFilterOperatorAndValueFromSearchParamValue(value, key as FilterKey);
 
       if (key === 'created_at') {
         const date = new Date(actualValue);
@@ -77,11 +70,11 @@ export default function PostsList() {
         const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
 
         switch (operator) {
-          case '':
+          case 'on':
             query = query.gte(key, startOfDay).lt(key, endOfDay);
             break;
           case 'not':
-            query = query.not(key, 'gte', startOfDay).not(key, 'lt', endOfDay);
+            query = query.or(`created_at.lte.${startOfDay},and(created_at.gt.${endOfDay})`);
             break;
           case 'after':
             query = query.gt(key, endOfDay);
@@ -97,7 +90,7 @@ export default function PostsList() {
             break;
         }
       } else {
-        if (operator === 'not') {
+        if (operator === 'is_not') {
           query = query.not(key, 'in', `(${actualValue})`);
         } else {
           query = query.in(key, [actualValue]);

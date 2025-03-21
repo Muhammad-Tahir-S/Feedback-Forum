@@ -10,7 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import useCustomSearchParams from '@/hooks/useCustomSearchParams';
+import useCustomSearchParams, {
+  dateOperators,
+  defaultOperators,
+  extractFilterOperatorAndValueFromSearchParamValue,
+} from '@/hooks/useCustomSearchParams';
 import useGetFilterOptions, { FilterKey } from '@/hooks/useGetFilterOptions';
 
 import { badgeOptions, integrationOptions, moduleOptions } from '../utils/options';
@@ -26,20 +30,16 @@ export default function SelectedFilters() {
       if (values.length > 0) {
         acc.push(
           ...values.map((value) => {
-            const [operator, actualValue] =
-              value.startsWith('not:') ||
-              value.startsWith('on:') ||
-              value.startsWith('after:') ||
-              value.startsWith('on_or_after:') ||
-              value.startsWith('before:') ||
-              value.startsWith('on_or_before:')
-                ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
-                : ['', value];
+            const { operator, actualValue } = extractFilterOperatorAndValueFromSearchParamValue(
+              value,
+              key as FilterKey
+            );
+            // console.log({ operator, actualValue, value, key });
+
             return {
               key: key as FilterKey,
               value: actualValue,
-              operator:
-                key === 'created_at' ? operator || 'on' : operator === 'not' ? ('Is Not' as const) : ('Is' as const),
+              operator,
             };
           })
         );
@@ -73,69 +73,27 @@ export default function SelectedFilters() {
                 </p>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {filter.key === 'created_at' ? (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, `${filter.value}`, 'on');
-                      }}
-                    >
-                      On
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, filter.value, 'not');
-                      }}
-                    >
-                      Not on
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, filter.value, 'after');
-                      }}
-                    >
-                      After
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, filter.value, 'on_or_after');
-                      }}
-                    >
-                      On or after
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, filter.value, 'before');
-                      }}
-                    >
-                      Before
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, filter.value, 'on_or_before');
-                      }}
-                    >
-                      On or before
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, `${filter.value}`, 'Is');
-                      }}
-                    >
-                      Is
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        updateSearchParamOperator(filter.key, filter.value, 'Is Not');
-                      }}
-                    >
-                      Is Not
-                    </DropdownMenuItem>
-                  </>
-                )}
+                {filter.key === 'created_at'
+                  ? dateOperators.map((op) => (
+                      <DropdownMenuItem
+                        key={op.operator}
+                        onClick={() => {
+                          updateSearchParamOperator(filter.key, `${filter.value}`, op.operator);
+                        }}
+                      >
+                        {op.name}
+                      </DropdownMenuItem>
+                    ))
+                  : defaultOperators.map((op) => (
+                      <DropdownMenuItem
+                        key={op.operator}
+                        onClick={() => {
+                          updateSearchParamOperator(filter.key, `${filter.value}`, op.operator);
+                        }}
+                      >
+                        {op.name}
+                      </DropdownMenuItem>
+                    ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
