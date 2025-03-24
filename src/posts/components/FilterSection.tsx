@@ -1,4 +1,4 @@
-import { LucideSearch, X } from 'lucide-react';
+import { LucideSearch, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
@@ -39,25 +39,12 @@ export default function FilterSection() {
         <div className="flex items-start justify-end relative rounded-md flex-1">
           <div
             className={cn(
-              'group flex relative items-center h-[33.58px] overflow-hidden transition-all duration-400  ease-in-out',
+              'group flex relative items-center h-8.5 overflow-hidden transition-all duration-400  ease-in-out',
               isSearchActive ? 'w-full' : 'w-0'
             )}
           >
             <div className="z-10 cursor-text">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                className="w-3.5 h-3.5 secondary-svg ml-3"
-                data-state="closed"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
+              <Search className="size-3.5 ml-3" />
             </div>
             <input
               ref={inputRef}
@@ -84,10 +71,10 @@ export default function FilterSection() {
             }}
             type="button"
             className={cn(
-              'h-[34px] justify-center flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
+              'size-8.5 shrink-0 justify-center flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
               isSearchActive
-                ? 'border-primary/40 rounded-l-none w-[38px] bg-transparent pl-0'
-                : 'w-[38px] sm:w-[91px] bg-primary/80 hover:bg-primary border-accent px-[10px]'
+                ? 'border-primary/40 rounded-l-none w-8.5 bg-transparent pl-0'
+                : 'w-9.5 sm:w-22.5 bg-primary/80 hover:bg-primary border-accent px-2.5'
             )}
           >
             {!isSearchActive ? (

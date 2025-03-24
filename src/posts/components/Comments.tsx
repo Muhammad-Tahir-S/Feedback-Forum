@@ -2,7 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Reply, SendHorizonal } from 'lucide-react';
+import { Heading2, Reply, SendHorizonal } from 'lucide-react';
+import {
+  Bold,
+  Code,
+  //  Image, Paperclip, Video ,
+  Italic,
+  List,
+  ListOrdered,
+} from 'lucide-react';
 import React, { useState } from 'react';
 
 import Loader from '@/components/Loader';
@@ -58,7 +66,6 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
         placeholder: 'Start writing a comment...',
       }),
     ],
-    // content: '',
   });
 
   const replyEditor = useEditor({
@@ -68,7 +75,6 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
         placeholder: 'Start writing a comment...',
       }),
     ],
-    // content: '',
   });
   const editorContent = newCommentEditor?.getHTML()?.trim();
 
@@ -83,8 +89,6 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
     }
   };
 
-  // const renderComments = ({ comments, parentId = null }: { comments: CommentWithUser[]; parentId: string | null }) => {
-
   const getCommentDepth = (commentId: string | null, comments: CommentWithUser[]): number => {
     let depth = 0;
     let currentComment = comments.find((comment) => comment.id === commentId);
@@ -96,6 +100,7 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
 
     return depth;
   };
+
   const renderComments = ({ comments, parentId = null }: { comments: CommentWithUser[]; parentId: string | null }) => {
     const childComments = comments.filter((comment) => comment.parent_comment_id === parentId);
 
@@ -222,15 +227,11 @@ function CommentEditor({
 
       <div className="h-6 w-full mt-4 flex gap-2">
         <button className="editor-btn" onClick={() => editor?.chain().focus().toggleBold().run()} title="Bold">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="editor-icon">
-            <path d="M6 4h7a4 4 0 0 1 0 8H6zm0 8h8a4 4 0 1 1 0 8H6z" />
-          </svg>
+          <Bold className="editor-icon" />
         </button>
 
         <button className="editor-btn" onClick={() => editor?.chain().focus().toggleItalic().run()} title="Italic">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="editor-icon">
-            <path d="M10 4v3h2.21l-3.42 10H6v3h8v-3h-2.21l3.42-10H18V4z" />
-          </svg>
+          <Italic className="editor-icon" />
         </button>
 
         <button
@@ -238,9 +239,7 @@ function CommentEditor({
           onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
           title="Heading 2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="editor-icon">
-            <path d="M6 4h3v16H6zm9 0h3v16h-3zm-5 8h5v3h-5z" />
-          </svg>
+          <Heading2 className="editor-icon" />
         </button>
 
         <button
@@ -248,9 +247,7 @@ function CommentEditor({
           onClick={() => editor?.chain().focus().toggleOrderedList().run()}
           title="Numbered List"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="editor-icon">
-            <path d="M4 6h2v2H4zm0 4h2v2H4zm0 4h2v2H4zm4-8h12v2H8zm0 4h12v2H8zm0 4h12v2H8z" />
-          </svg>
+          <ListOrdered className="editor-icon" />
         </button>
 
         <button
@@ -258,9 +255,7 @@ function CommentEditor({
           onClick={() => editor?.chain().focus().toggleBulletList().run()}
           title="Bullet List"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="editor-icon">
-            <path d="M4 6h2v2H4zm0 4h2v2H4zm0 4h2v2H4zm4-8h12v2H8zm0 4h12v2H8zm0 4h12v2H8z" />
-          </svg>
+          <List className="editor-icon" />
         </button>
 
         <button
@@ -268,9 +263,7 @@ function CommentEditor({
           onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
           title="Code Block"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="editor-icon">
-            <path d="M8 4h2v16H8zm6 0h2v16h-2z" />
-          </svg>
+          <Code className="editor-icon" />
         </button>
       </div>
 

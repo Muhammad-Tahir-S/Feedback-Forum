@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
+import { ChevronUpIcon, MessageCircleMoreIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
+import PinIcon from '@/assets/icons/pin.svg';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
@@ -54,26 +56,7 @@ export const PostCard = (post: PostWithUser & { refetch: VoidFunction }) => {
         <div className="relative">
           {is_pinned && (
             <div className="absolute flex items-center p-1 rounded-md -top-4 -right-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-3 h-3 -mt-[3px] mr-0.5"
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--primary)' }}
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path
-                  d="M15.113 3.21l.094 .083l5.5 5.5a1 1 0 0 1 -1.175 1.59l-3.172 3.171l-1.424 3.797a1 1 0 0 1 -.158 .277l-.07 .08l-1.5 1.5a1 1 0 0 1 -1.32 .082l-.095 -.083l-2.793 -2.792l-3.793 3.792a1 1 0 0 1 -1.497 -1.32l.083 -.094l3.792 -3.793l-2.792 -2.793a1 1 0 0 1 -.083 -1.32l.083 -.094l1.5 -1.5a1 1 0 0 1 .258 -.187l.098 -.042l3.796 -1.425l3.171 -3.17a1 1 0 0 1 1.497 -1.26z"
-                  strokeWidth="0"
-                  fill="currentColor"
-                ></path>
-              </svg>
+              <PinIcon className="w-3 h-3 -mt-[3px] mr-0.5 text-primary" />
               <p className="uppercase text-[11px] tracking-wide font-semibold text-muted-foreground">Pinned</p>
             </div>
           )}
@@ -93,59 +76,26 @@ export const PostCard = (post: PostWithUser & { refetch: VoidFunction }) => {
           <div className="flex flex-wrap items-end justify-between gap-3 pt-3.5">
             <div className="flex items-center mr-2">
               <div className="relative flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full">
-                <div className="relative rounded-full">
-                  <svg
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      width: '1px',
-                      height: '1px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <defs>
-                      <mask id={`avatar-mask-${id}`} maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
-                        <path
-                          fill="white"
-                          fillRule="evenodd"
-                          d="
-                            M0,0 
-                            h20 
-                            v20 
-                            h-20 
-                            Z
-                            M17,3.35
-                            m -8,0
-                            a 8,8 0 1,0 16,0
-                            a 8,8 0 1,0 -16,0
-                            Z
-                          "
-                        ></path>
-                      </mask>
-                    </defs>
-                  </svg>
-                  <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-full h-5 w-5">
-                    <div className="absolute inset-0 bg-secondary/70" style={{ mask: `url(#avatar-mask-${id})` }}></div>
-                    {postUser?.avatar_url ? (
-                      <img
-                        className="object-cover rounded-full h-full w-full z-10"
-                        src={postUser?.avatar_url}
-                        alt={postUser?.username || postUser?.email}
-                        style={{
-                          borderRadius: '100%',
-                          mask: `url(#avatar-mask-${id})`,
-                        }}
-                      />
-                    ) : (
-                      <Avatar>
-                        <AvatarImage src={postUser?.avatar_url} alt="user-avatar" />
-                        <AvatarFallback>{postUser?.username?.slice(0, 1)}</AvatarFallback>
-                      </Avatar>
-                    )}
-                  </div>
+                <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-full h-5 w-5">
+                  {postUser?.avatar_url ? (
+                    <img
+                      className="object-cover rounded-full h-full w-full z-10"
+                      src={postUser?.avatar_url}
+                      alt={postUser?.username || postUser?.email}
+                      style={{
+                        borderRadius: '100%',
+                        mask: `url(#avatar-mask-${id})`,
+                      }}
+                    />
+                  ) : (
+                    <Avatar>
+                      <AvatarImage src={postUser?.avatar_url} alt="user-avatar" />
+                      <AvatarFallback>{postUser?.username?.slice(0, 1)}</AvatarFallback>
+                    </Avatar>
+                  )}
                 </div>
               </div>
+
               <p className="text-sm ml-1.5 text-muted-foreground">
                 <span className="font-medium">{postUser?.username || postUser?.email}</span>{' '}
                 <span className="text-xs font-medium ml-1.5 text-muted-foreground/70 capitalize">
@@ -156,19 +106,7 @@ export const PostCard = (post: PostWithUser & { refetch: VoidFunction }) => {
 
             <div className="flex items-center space-x-2 -mb-[3px]">
               <div className="flex items-center px-2 py-1 text-xs font-medium text-muted-foreground rounded-md">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  className="w-3.5 h-3.5 mr-1 text-card-foreground/70"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
+                <MessageCircleMoreIcon className="w-3.5 h-3.5 mr-1 fill-card-foreground/70 stroke-black" />{' '}
                 {comments_count}
               </div>
 
@@ -196,22 +134,14 @@ export const PostCard = (post: PostWithUser & { refetch: VoidFunction }) => {
           className="cursor-pointer group flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in disabled:cursor-not-allowed disabled:opacity-70"
         >
           <div className="group-hover:text-foreground flex flex-col items-center justify-center pb-1 px-2 rounded-md">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+            <ChevronUpIcon
               aria-hidden="true"
               aria-label={isUpvoted ? 'Remove upvote' : 'Upvote'}
               className={`flex-shrink-0 w-6 h-6 group-hover:-translate-y-0.5 cursor-pointer transition-transform ${
                 isUpvoted ? 'text-primary' : 'text-muted-foreground'
               }`}
-            >
-              <path
-                fillRule="evenodd"
-                d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
+            />
+
             <p className="text-sm font-semibold text-foreground">{votes?.length}</p>
           </div>
         </button>
