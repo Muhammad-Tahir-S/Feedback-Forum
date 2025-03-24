@@ -1,4 +1,11 @@
-import { Bold, Code, Image, Italic, Link, List, ListOrdered, Paperclip, Video } from 'lucide-react';
+import {
+  Bold,
+  //  Code, Image, Paperclip, Video ,
+  Italic,
+  Link,
+  List,
+  ListOrdered,
+} from 'lucide-react';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history } from 'prosemirror-history';
 import { ellipsis, emDash, inputRules, smartQuotes } from 'prosemirror-inputrules';
@@ -145,16 +152,28 @@ const ProseMirrorEditor: React.FC<ProseMirrorEditorProps> = ({ placeholder = 'Po
       }
     },
 
-    image: () => {
-      // Placeholder for image upload functionality
-      alert('Image upload functionality would go here');
-    },
+    // image: () => {
+    //   // Placeholder for image upload functionality
+    //   alert('Image upload functionality would go here');
+    // },
 
-    // Default empty handler for buttons without specific actions
-    noOp: () => {
-      // No operation
-    },
+    // // Default empty handler for buttons without specific actions
+    // noOp: () => {
+    //   // No operation
+    // },
   };
+
+  const buttons = [
+    { icon: Bold, onClick: commands.bold },
+    { icon: Italic, onClick: commands.italic, className: 'hidden sm:flex' },
+    { icon: List, onClick: commands.bulletList },
+    { icon: ListOrdered, onClick: commands.orderedList, className: 'hidden sm:flex' },
+    { icon: Link, onClick: commands.link },
+    // { icon: Image, onClick: commands.image },
+    // { icon: Code, onClick: commands.noOp },
+    // { icon: Video, onClick: commands.noOp, className: 'hidden lg:flex items-center justify-center w-6 h-6' },
+    // { icon: Paperclip, onClick: commands.noOp, className: 'hidden lg:flex' },
+  ];
 
   return (
     <div className="text-[15px] min-h-[110px] px-4 py-1 relative !text-base sm:!text-[15px] bg-transparent border-0">
@@ -168,32 +187,9 @@ const ProseMirrorEditor: React.FC<ProseMirrorEditorProps> = ({ placeholder = 'Po
 
       <div className="mt-4">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <EditorButton icon={<Image className="editor-icon" />} onClick={commands.image} />
-          <EditorButton icon={<Bold className="editor-icon" />} onClick={commands.bold} />
-          <EditorButton
-            icon={<Italic className="editor-icon" />}
-            onClick={commands.italic}
-            className="hidden sm:flex"
-          />
-          <EditorButton icon={<Code className="editor-icon" />} onClick={commands.noOp} className="hidden sm:flex" />
-          <EditorButton icon={<List className="editor-icon" />} onClick={commands.bulletList} />
-          <EditorButton
-            icon={<ListOrdered className="editor-icon" />}
-            onClick={commands.orderedList}
-            className="hidden sm:flex"
-          />
-          <EditorButton icon={<Link className="editor-icon" />} onClick={commands.link} />
-          <EditorButton icon={<Code className="editor-icon" />} onClick={commands.noOp} className="hidden lg:flex" />
-          <EditorButton
-            icon={<Video className="editor-icon" />}
-            onClick={commands.noOp}
-            className="hidden lg:flex items-center justify-center w-6 h-6"
-          />
-          <EditorButton
-            icon={<Paperclip className="editor-icon" />}
-            onClick={commands.noOp}
-            className="hidden lg:flex"
-          />
+          {buttons.map(({ onClick, className, icon: Icon }, index) => (
+            <EditorButton key={index} icon={<Icon className="editor-icon" />} onClick={onClick} className={className} />
+          ))}
         </div>
       </div>
     </div>
