@@ -1,7 +1,7 @@
 import { PopoverContent } from '@radix-ui/react-popover';
 import { usePrevious } from '@uidotdev/usehooks';
 import { Filter as FilterIcon } from 'lucide-react';
-import { useState } from 'react';
+import { ComponentProps, useState } from 'react';
 
 import { Calendar } from '@/components/ui/calendar';
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -28,6 +28,29 @@ export default function Filter() {
   }
 
   const createdAtSearchParams = searchParams.get('created_at');
+
+  function onSelect(item: ComponentProps<typeof SearchDropdownContent>['items'][number]) {
+    if (!selectedKey) {
+      setSelectedKey(item.value as FilterKey);
+    } else {
+      if (isValueInSearchParams(selectedKey, item.value)) {
+        removeSearchParamValue(selectedKey, item.value);
+      } else {
+        addSearchParam(selectedKey, item.value);
+      }
+      closeMenu();
+    }
+  }
+
+  function onMultiSelect(item: ComponentProps<typeof SearchDropdownContent>['items'][number]) {
+    if (!selectedKey) {
+      return undefined;
+    } else {
+      return isValueInSearchParams(selectedKey, item.value)
+        ? removeSearchParamValue(selectedKey, item.value)
+        : addSearchParam(selectedKey, item.value);
+    }
+  }
 
   return (
     <Popover open={selectedKey === 'created_at'} modal={false}>
@@ -83,26 +106,8 @@ export default function Filter() {
                       }))
                     : options[selectedKey]?.options) || []
                 }
-                onSelect={
-                  !selectedKey
-                    ? (item) => setSelectedKey(item.value as FilterKey)
-                    : (item) => {
-                        if (isValueInSearchParams(selectedKey, item.value)) {
-                          removeSearchParamValue(selectedKey, item.value);
-                        } else {
-                          addSearchParam(selectedKey, item.value);
-                        }
-                        closeMenu();
-                      }
-                }
-                onMultiSelect={
-                  !selectedKey
-                    ? undefined
-                    : (item) =>
-                        isValueInSearchParams(selectedKey, item.value)
-                          ? removeSearchParamValue(selectedKey, item.value)
-                          : addSearchParam(selectedKey, item.value)
-                }
+                onSelect={onSelect}
+                onMultiSelect={onMultiSelect}
                 isSelected={!selectedKey ? undefined : (item) => isValueInSearchParams(selectedKey, item.value)}
               />
             )}
