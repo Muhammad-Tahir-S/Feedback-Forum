@@ -30,7 +30,7 @@ export default function SearchDropdownContent({
   const [searchValue, setSearchValue] = useState('');
 
   const filteredItems = useMemo(
-    () => items.filter((item) => item.label.toLowerCase().includes(searchValue.toLowerCase())),
+    () => items?.filter((item) => item.label.toLowerCase().includes(searchValue.toLowerCase())),
     [items, searchValue]
   );
 

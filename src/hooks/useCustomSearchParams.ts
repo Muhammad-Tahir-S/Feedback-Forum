@@ -33,13 +33,17 @@ export const isDateFilterParam = (value: string, key: FilterKey) =>
     });
 
 export const extractFilterOperatorAndValueFromSearchParamValue = (value: string, key: FilterKey) => {
-  const [operator, actualValue] = isDateFilterParam(value, key)
-    ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
-    : key === 'created_at'
-      ? ['on', value]
-      : value.includes(':')
-        ? value.split(':')
-        : ['is', value];
+  const [operator, actualValue] =
+    key === 'custom_field' &&
+    ['module', 'integrations', 'bug_sources'].some((field) => value?.includes(field) && value !== field)
+      ? [value?.includes(':') ? value.split(':')[0] : 'is', value.split(':').at(-1) || value]
+      : isDateFilterParam(value, key)
+        ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
+        : key === 'created_at'
+          ? ['on', value]
+          : value.includes(':')
+            ? value.split(':')
+            : ['is', value];
 
   // console.log({ operator, actualValue, value, key });
 
@@ -110,6 +114,19 @@ export default function useCustomSearchParams() {
     setSearchParams(searchParams);
   };
 
+  const updateSearchParamValue = (key: FilterKey, oldValue: string, newValue: string) => {
+    const existingValues = searchParams.getAll(key);
+
+    const updatedValues = existingValues.map((existingValue) => {
+      return existingValue === oldValue ? newValue : existingValue;
+    });
+
+    searchParams.delete(key);
+    updatedValues.forEach((value) => searchParams.append(key, value));
+
+    setSearchParams(searchParams);
+  };
+
   return {
     addSearchParam,
     isValueInSearchParams,
@@ -117,5 +134,6 @@ export default function useCustomSearchParams() {
     searchParams,
     setSearchParams,
     updateSearchParamOperator,
+    updateSearchParamValue,
   };
 }

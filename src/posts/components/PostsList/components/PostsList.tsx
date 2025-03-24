@@ -39,7 +39,7 @@ export default function PostsList() {
       return await useFetchPosts({ pageParam, boardId, searchQuery, sortBy, filters, pageSize });
     },
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.length === pageSize ? allPages.length : undefined;
+      return lastPage?.length === pageSize ? allPages?.length : undefined;
     },
     initialPageParam: 0,
     refetchOnWindowFocus: false,

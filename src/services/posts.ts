@@ -25,18 +25,35 @@ export async function useFetchPosts({
   if (searchQuery) {
     query = query.ilike('title', `%${searchQuery}%`);
   }
-
   Object.entries(filters || []).forEach(([key, values]) => {
     if (values.length > 1) {
       if (key !== 'created_at') {
         const notValues = values.filter((v) => v.startsWith('is_not:')).map((v) => v.replace('is_not:', ''));
         const regularValues = values.filter((v) => !v.startsWith('is_not:'));
+
         if (regularValues.length > 0) {
-          query = query.in(key, regularValues);
+          if (key === 'custom_field') {
+            regularValues.forEach((value) => {
+              const [customFieldKey, customFieldValue] = value.split('-');
+
+              query =
+                customFieldKey === 'module'
+                  ? query.in(customFieldKey, [customFieldValue])
+                  : query.contains(customFieldKey, [customFieldValue]);
+            });
+          } else query = query.in(key, regularValues);
         }
 
         if (notValues.length > 0) {
-          query = query.not(key, 'in', `(${notValues})`);
+          if (key === 'custom_field') {
+            notValues.forEach((value) => {
+              const [customFieldKey, customFieldValue] = value.split('-');
+              query =
+                customFieldKey === 'module'
+                  ? query.not(customFieldKey, 'in', `(${customFieldValue})`)
+                  : query.not(customFieldKey, 'cs', `{${customFieldValue}}`);
+            });
+          } else query = query.not(key, 'in', `(${notValues})`);
         }
       }
       return;
@@ -70,6 +87,20 @@ export async function useFetchPosts({
         case 'on_or_before':
           query = query.lt(key, endOfDay);
           break;
+      }
+    } else if (key === 'custom_field') {
+      const [customFieldKey, customFieldValue] = actualValue.split('-');
+
+      if (operator === 'is_not') {
+        query =
+          customFieldKey === 'module'
+            ? query.not(customFieldKey, 'in', `(${customFieldValue})`)
+            : query.not(customFieldKey, 'cs', `{${customFieldValue}}`);
+      } else {
+        query =
+          customFieldKey === 'module'
+            ? query.in(customFieldKey, [customFieldValue])
+            : query.contains(customFieldKey, [customFieldValue]);
       }
     } else {
       if (operator === 'is_not') {

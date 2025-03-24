@@ -20,6 +20,8 @@ import useGetFilterOptions, { FilterKey } from '@/hooks/useGetFilterOptions';
 import { badgeOptions, integrationOptions, moduleOptions } from '../utils/options';
 import SearchDropdownContent from './CreatePostButton/SearchDropdownContent';
 
+type DropdownItem = ComponentProps<typeof SearchDropdownContent>['items'][number];
+
 export default function SelectedFilters() {
   const { searchParams, removeSearchParamValue, updateSearchParamOperator } = useCustomSearchParams();
   const { options } = useGetFilterOptions();
@@ -34,7 +36,6 @@ export default function SelectedFilters() {
               value,
               key as FilterKey
             );
-            // console.log({ operator, actualValue, value, key });
 
             return {
               key: key as FilterKey,
@@ -61,7 +62,7 @@ export default function SelectedFilters() {
               {options[filter.key]?.icon}
               <span>
                 {filter.key === 'custom_field'
-                  ? options.custom_field.options?.find((opt) => opt.value === filter.value)?.label
+                  ? options.custom_field.options?.find((opt) => filter.value?.includes(opt.value))?.label
                   : options[filter.key]?.label}
               </span>
             </p>
@@ -170,14 +171,15 @@ function DatePopover({ filter: { value } }: { filter: { key: FilterKey; value: s
 }
 
 function CustomFieldDropdown({
-  filter: { value, key },
+  filter: { value, key, operator },
 }: {
   filter: { key: FilterKey; value: string; operator: string };
 }) {
-  const { searchParams, addSearchParam: _aS } = useCustomSearchParams();
+  const actualValue = value?.includes('-') ? value.split('-')[0] : value;
+  const { searchParams, updateSearchParamValue } = useCustomSearchParams();
   const { options } = useGetFilterOptions();
 
-  const customFieldSearchParams = searchParams.get('custom_field');
+  const customFieldSearchParams = searchParams.getAll('custom_field');
   const [open, setOpen] = useState(false);
 
   const dropdownItems: Record<
@@ -185,17 +187,37 @@ function CustomFieldDropdown({
     ComponentProps<typeof SearchDropdownContent>['items']
   > = { bug_sources: badgeOptions, module: moduleOptions, integrations: integrationOptions };
 
-  console.log({ value, key, customFieldSearchParams, items: dropdownItems[value as keyof typeof dropdownItems] });
+  const isSelected = (item: DropdownItem): boolean => {
+    const fullValue = `${actualValue}:${item.value}`;
+
+    return customFieldSearchParams?.some((param) => {
+      const { actualValue } = extractFilterOperatorAndValueFromSearchParamValue(param, key as FilterKey);
+      return actualValue === fullValue;
+    });
+  };
+
+  const onSelect = (item: DropdownItem) => {
+    const fullValue =
+      operator === 'is_not' ? `${operator}:${actualValue}-${item.value}` : `${actualValue}-${item.value}`;
+    updateSearchParamValue(key, operator === 'is_not' ? `${operator}:${value}` : value, fullValue);
+  };
+
   return (
     <DropdownMenu open={open} onOpenChange={(open) => setOpen(open)}>
       <DropdownMenuTrigger>
         <div className="border-r border-sidebar-accent-foreground/15 shrink-0 min-w-fit">
-          <p className="inline-flex items-center px-2  border-sidebar-accent-foreground/15 py-1.5 text-primary-foreground bg-sidebar-accent cursor-pointer hover:bg-primary/80 transition-all duration-200">
-            {options.custom_field.options?.map((op) => op.value).includes(value) ? 'Not Selected' : value}
+          <p className="inline-flex items-center px-2  border-sidebar-accent-foreground/15 py-1.5 text-primary-foreground bg-sidebar-accent cursor-pointer hover:bg-primary/80 transition-all duration-200 capitalize">
+            {options.custom_field.options?.map((op) => op.value).includes(value)
+              ? 'Not Selected'
+              : value.split('-').at(-1)}
           </p>
         </div>
       </DropdownMenuTrigger>
-      <SearchDropdownContent items={dropdownItems[value as keyof typeof dropdownItems]} onSelect={() => {}} />
+      <SearchDropdownContent
+        items={dropdownItems[actualValue as keyof typeof dropdownItems]}
+        onSelect={onSelect}
+        isSelected={isSelected}
+      />
     </DropdownMenu>
   );
 }
