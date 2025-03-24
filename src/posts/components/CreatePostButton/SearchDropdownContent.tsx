@@ -57,7 +57,7 @@ export default function SearchDropdownContent({
               tabIndex={undefined}
             >
               <span
-                className="inline-flex gap-1 items-center"
+                className="inline-flex gap-2 items-center"
                 onClick={(e) => {
                   e.preventDefault();
                   onSelect?.(item);
@@ -73,7 +73,7 @@ export default function SearchDropdownContent({
               onClick={() => onSelect?.(item)}
               key={`${index}_${item.value}`}
             >
-              <span className="inline-flex items-center">
+              <span className="inline-flex gap-2 items-center">
                 {item?.icon} {item.label}
               </span>
             </DropdownMenuItem>

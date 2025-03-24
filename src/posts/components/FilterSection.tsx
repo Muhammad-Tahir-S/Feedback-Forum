@@ -39,7 +39,7 @@ export default function FilterSection() {
         <div className="flex items-start justify-end relative rounded-md flex-1">
           <div
             className={cn(
-              'group flex relative items-center h-[33.58px] overflow-hidden transition-all duration-400  ease-in-out',
+              'group flex relative items-center h-8.5 overflow-hidden transition-all duration-400  ease-in-out',
               isSearchActive ? 'w-full' : 'w-0'
             )}
           >
@@ -84,10 +84,10 @@ export default function FilterSection() {
             }}
             type="button"
             className={cn(
-              'h-[34px] justify-center flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
+              'h-8.5 justify-center flex whitespace-nowrap rounded-md items-center cursor-pointer border text-[14px] transition-all duration-500 hover:bg-primary/40 overflow-hidden',
               isSearchActive
-                ? 'border-primary/40 rounded-l-none w-[38px] bg-transparent pl-0'
-                : 'w-[38px] sm:w-[91px] bg-primary/80 hover:bg-primary border-accent px-[10px]'
+                ? 'border-primary/40 rounded-l-none w-6.5 bg-transparent pl-0'
+                : 'w-9.5 sm:w-22.5 bg-primary/80 hover:bg-primary border-accent px-2.5'
             )}
           >
             {!isSearchActive ? (
