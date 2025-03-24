@@ -66,7 +66,6 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
         placeholder: 'Start writing a comment...',
       }),
     ],
-    // content: '',
   });
 
   const replyEditor = useEditor({
@@ -76,7 +75,6 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
         placeholder: 'Start writing a comment...',
       }),
     ],
-    // content: '',
   });
   const editorContent = newCommentEditor?.getHTML()?.trim();
 
@@ -91,8 +89,6 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
     }
   };
 
-  // const renderComments = ({ comments, parentId = null }: { comments: CommentWithUser[]; parentId: string | null }) => {
-
   const getCommentDepth = (commentId: string | null, comments: CommentWithUser[]): number => {
     let depth = 0;
     let currentComment = comments.find((comment) => comment.id === commentId);
@@ -104,6 +100,7 @@ const CommentsSection: React.FC<Props> = ({ postId }) => {
 
     return depth;
   };
+
   const renderComments = ({ comments, parentId = null }: { comments: CommentWithUser[]; parentId: string | null }) => {
     const childComments = comments.filter((comment) => comment.parent_comment_id === parentId);
 
