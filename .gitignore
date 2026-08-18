@@ -12,7 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Secrets and local env (commit only .env.example templates)
 .env
+.env.*
+!.env.example
+
+# Supabase CLI machine-local state (link tokens, temp dumps, branches)
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+supabase/.env.*
 
 # Editor directories and files
 .vscode/*
