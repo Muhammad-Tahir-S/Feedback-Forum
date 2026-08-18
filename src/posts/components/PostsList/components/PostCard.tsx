@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
+import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +14,7 @@ export const PostCard = ({
   title,
   status,
   user: postUser,
-  votes,
+  has_voted: hasVoted,
   board,
   created_at,
   is_pinned,
@@ -44,17 +45,30 @@ export const PostCard = ({
     closed: 'Closed',
   };
 
-  const isUpvoted = user?.id && votes?.includes(user?.id);
+  const isUpvoted = Boolean(user?.id && hasVoted);
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async ({ postId, userId }: { postId: string; userId: string }) => {
-      await supabase
-        .from('posts')
-        .update({ votes: !votes.includes(userId) ? [...votes, userId] : votes.filter((id) => id !== userId) })
-        .eq('id', postId);
+    mutationFn: async ({ postId, remove }: { postId: string; remove: boolean }) => {
+      if (!user?.id) {
+        throw new Error('Sign in to vote');
+      }
+
+      if (remove) {
+        const { error } = await supabase.from('votes').delete().eq('post_id', postId).eq('user_id', user.id);
+        if (error) throw error;
+        return;
+      }
+
+      const { error } = await supabase.from('votes').insert({ post_id: postId });
+      if (error) throw error;
     },
     onSuccess: () => {
       refetch();
+    },
+    onError: (error) => {
+      toast.error('Could not update vote', {
+        description: error.message || 'Unknown error occurred',
+      });
     },
   });
 
@@ -210,8 +224,8 @@ export const PostCard = ({
       <div className="flex">
         <button
           aria-label={`${votes_count} upvotes. ${isUpvoted ? 'You upvoted this' : 'Click to upvote'}`}
-          onClick={async () => await mutateAsync({ userId: user?.id || '', postId: id })}
-          disabled={isPending}
+          onClick={async () => await mutateAsync({ postId: id, remove: isUpvoted })}
+          disabled={isPending || !user?.id}
           className="cursor-pointer flex flex-shrink-0 flex-col items-center justify-center w-14 sm:w-16 py-2 border-l bg-gradient-to-r from-accent/5 hover:bg-accent/10 border-primary/30 hover:border-primary/50 duration-75 ease-in disabled:cursor-not-allowed disabled:opacity-70"
         >
           <div className="group-hover:text-foreground flex flex-col items-center justify-center pb-1 px-2 rounded-md">
@@ -231,7 +245,7 @@ export const PostCard = ({
                 clipRule="evenodd"
               ></path>
             </svg>
-            <p className="text-sm font-semibold text-foreground">{votes?.length}</p>
+            <p className="text-sm font-semibold text-foreground">{votes_count ?? 0}</p>
           </div>
         </button>
       </div>
