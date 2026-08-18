@@ -38,8 +38,12 @@ export default function AppRoutes() {
 }
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return null;
+  }
 
   if (user) {
     return children;

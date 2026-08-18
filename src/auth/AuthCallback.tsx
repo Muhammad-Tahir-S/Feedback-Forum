@@ -1,35 +1,63 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import supabase from '@/lib/supabase';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const [status, setStatus] = useState('Completing authentication, please wait...');
 
   useEffect(() => {
-    const handleAuthCallback = async () => {
-      const { hash } = window.location;
+    let cancelled = false;
 
-      if (hash) {
-        const { data, error } = await supabase.auth.getSession();
+    const complete = async () => {
+      const search = new URLSearchParams(window.location.search);
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const error =
+        search.get('error_description') || search.get('error') || hash.get('error_description') || hash.get('error');
 
-        if (error) {
-          console.error('Error during auth callback:', error);
-          navigate('/auth/signin');
-        } else if (data.session) {
-          navigate('/');
+      if (error) {
+        if (!cancelled) {
+          setStatus(error);
+          navigate('/auth/signin', { replace: true, state: { authError: error } });
         }
-      } else {
-        navigate('/auth/signin');
+        return;
       }
+
+      const code = search.get('code');
+      const { data: existing } = await supabase.auth.getUser();
+      if (cancelled) return;
+
+      if (!existing.user && code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (cancelled) return;
+        if (exchangeError) {
+          navigate('/auth/signin', { replace: true, state: { authError: exchangeError.message } });
+          return;
+        }
+      }
+
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+
+      if (data.user) {
+        navigate('/posts', { replace: true });
+        return;
+      }
+
+      navigate('/auth/signin', { replace: true });
     };
 
-    handleAuthCallback();
+    void complete();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   return (
-    <div className="auth-callback">
-      <p>Completing authentication, please wait...</p>
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background">
+      <p className="text-muted-foreground">{status}</p>
     </div>
   );
 };

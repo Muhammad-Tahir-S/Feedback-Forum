@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import NotFound from '@/app/components/NotFound';
 
+import AuthCallback from './AuthCallback';
 import AuthLayout from './AuthLayout';
 import ResetPassword from './ResetPassword';
 import SignIn from './SignIn';
@@ -11,6 +12,7 @@ import UpdatePassword from './UpdatePassword';
 export default function AuthRoutes() {
   return (
     <Routes>
+      <Route path="callback" element={<AuthCallback />} />
       <Route path="/" element={<AuthLayout />}>
         <Route index element={<Navigate replace to="signin" />} />
         <Route path="signin" element={<SignIn />} />

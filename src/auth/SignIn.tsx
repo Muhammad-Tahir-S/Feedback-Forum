@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,8 @@ const SignIn = () => {
     // signInWithGoogle
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const authError = (location.state as { authError?: string } | null)?.authError;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +56,8 @@ const SignIn = () => {
     <div>
       <h2 className="text-2xl font-bold text-card-foreground">Sign in</h2>
       <p className="text-muted-foreground">Enter your credentials to access your account</p>
+
+      {authError ? <div className="mt-4 rounded-md bg-red-100 p-3 text-sm text-red-800">{authError}</div> : null}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">

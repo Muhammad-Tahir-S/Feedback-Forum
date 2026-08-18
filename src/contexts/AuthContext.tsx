@@ -1,4 +1,4 @@
-import { Session, User } from '@supabase/supabase-js';
+import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { Database } from 'database.types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import supabase from '../lib/supabase';
 type AuthContextType = {
   session: Session | null;
   user: UserType | null;
+  isPasswordRecovery: boolean;
   signUp: (email: string, password: string, username: string) => ReturnType<typeof supabase.auth.signUp>;
   signIn: (email: string, password: string) => ReturnType<typeof supabase.auth.signInWithPassword>;
   signInWithGoogle: () => Promise<void>;
@@ -24,65 +25,75 @@ type Board = Database['public']['Tables']['boards']['Row'];
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [localSession] = useLocalStorage<Session>(
-    'sb-' + import.meta.env.VITE_SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token'
-  );
-
-  const [user, setUser] = useState<UserType | null>(localSession?.user ? getUserFromSupabase(localSession.user) : null);
-  const [session, setSession] = useState<Session | null>(localSession || null);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [boards] = useLocalStorage<Board[] | null>('boards');
 
-  async function initAuth() {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setSession(session);
-        setUser(getUserFromSupabase(session?.user));
+  useEffect(() => {
+    let cancelled = false;
 
-        if (!boards) {
-          supabase
-            .from('boards')
-            .select()
-            .then(({ data }) => {
-              if (data?.length) {
-                localStorage.setItem('boards', JSON.stringify(data));
-              }
-            });
-        }
-      } else {
-        setSession(null);
-        setUser(null);
-      }
-      setLoading(false);
-    });
+    const applyVerifiedUser = (nextUser: User | null, nextSession: Session | null) => {
+      if (cancelled) return;
+      setSession(nextSession);
+      setUser(nextUser ? getUserFromSupabase(nextUser) : null);
+    };
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ? getUserFromSupabase(session?.user) : null);
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, nextSession) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      }
+      if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        setIsPasswordRecovery(false);
+      }
+
+      // INITIAL_SESSION is storage-only. Identity is confirmed with getUser() below.
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
+
+      applyVerifiedUser(nextSession?.user ?? null, nextSession);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }
+    void (async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (cancelled) return;
 
-  useEffect(() => {
-    initAuth();
+      if (!error && data.user) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        applyVerifiedUser(data.user, sessionData.session);
+        if (isRecoveryRedirect()) {
+          setIsPasswordRecovery(true);
+        }
+      } else {
+        applyVerifiedUser(null, null);
+      }
+
+      setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    if (localSession && !boards) {
+    if (user && !boards) {
       supabase
         .from('boards')
-        .select()
+        .select('id, name, value')
         .then(({ data }) => {
           if (data?.length) {
             localStorage.setItem('boards', JSON.stringify(data));
           }
         });
     }
-  }, [localSession, boards]);
+  }, [user, boards]);
 
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
@@ -165,6 +176,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updatePassword = async (password: string) => {
+    if (!isPasswordRecovery) {
+      const message = 'Password can only be updated from a reset link.';
+      toast.error('Password update failed', { description: message });
+      return {
+        data: { user: null },
+        error: { message, name: 'AuthError', status: 403 },
+      } as Awaited<ReturnType<typeof supabase.auth.updateUser>>;
+    }
+
     setLoading(true);
     const response = await supabase.auth.updateUser({
       password,
@@ -187,6 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     session,
     user,
+    isPasswordRecovery,
     signUp,
     signIn,
     signInWithGoogle,
@@ -214,4 +235,15 @@ function getUserFromSupabase(user: User): UserType {
     username: user.user_metadata?.['username'] || '',
     avatar_url: '',
   };
+}
+
+function isRecoveryRedirect() {
+  const search = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+  return (
+    hash.get('type') === 'recovery' ||
+    search.get('type') === 'recovery' ||
+    (window.location.pathname.includes('/auth/update-password') && search.has('code'))
+  );
 }

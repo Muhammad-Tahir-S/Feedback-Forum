@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,8 @@ const formSchema = z.object({
 
 const ResetPassword: React.FC = () => {
   const { resetPassword } = useAuth();
+  const location = useLocation();
+  const authError = (location.state as { authError?: string } | null)?.authError;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,6 +50,8 @@ const ResetPassword: React.FC = () => {
       <p className="text-muted-foreground">
         Enter your email address and we'll send you a link to reset your password.
       </p>
+
+      {authError ? <div className="mt-4 rounded-md bg-red-100 p-3 text-sm text-red-800">{authError}</div> : null}
 
       {message && <div className="mt-4 rounded-md bg-green-100 p-3 text-sm text-green-800">{message}</div>}
 

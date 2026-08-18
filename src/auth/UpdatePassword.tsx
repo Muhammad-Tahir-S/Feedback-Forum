@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
+import { MIN_PASSWORD_LENGTH, passwordMessage } from '@/auth/passwordPolicy';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z
   .object({
-    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+    password: z.string().min(MIN_PASSWORD_LENGTH, { message: passwordMessage }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -21,7 +22,7 @@ const formSchema = z
   });
 
 const UpdatePassword: React.FC = () => {
-  const { updatePassword } = useAuth();
+  const { updatePassword, isPasswordRecovery, loading } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -34,6 +35,16 @@ const UpdatePassword: React.FC = () => {
 
   const isSubmitting = form.formState.isSubmitting;
   const [message, setMessage] = React.useState<string | null>(null);
+  const [completed, setCompleted] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!loading && !isPasswordRecovery && !completed) {
+      navigate('/auth/reset-password', {
+        replace: true,
+        state: { authError: 'Open the password reset link from your email to continue.' },
+      });
+    }
+  }, [completed, isPasswordRecovery, loading, navigate]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setMessage(null);
@@ -46,12 +57,17 @@ const UpdatePassword: React.FC = () => {
         message: error.message,
       });
     } else {
+      setCompleted(true);
       setMessage('Password updated successfully.');
       setTimeout(() => {
         navigate('/posts');
       }, 2000);
     }
   };
+
+  if (loading || (!isPasswordRecovery && !completed)) {
+    return <p className="text-muted-foreground">Checking reset link...</p>;
+  }
 
   return (
     <div>
