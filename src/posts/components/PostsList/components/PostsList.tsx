@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
 import useGetBoardId from '@/hooks/useGetBoardId';
-import supabase from '@/lib/supabase';
+import { collectFilters, fetchPostPage, parseSortBy } from '@/posts/listQuery';
 import { PostWithUser } from '@/posts/types';
 
 import EmptyState from '../../EmptyState';
@@ -11,120 +12,61 @@ import { PostCard } from './PostCard';
 export default function PostsList() {
   const { boardId } = useGetBoardId();
   const [searchParams] = useSearchParams();
-  const sortBy = searchParams.get('sortBy') || 'comments_count';
+  const sortBy = parseSortBy(searchParams.get('sortBy'));
   const searchQuery = searchParams.get('search') || '';
+  const filters = collectFilters(searchParams);
 
-  const filters = Array.from(searchParams.entries()).reduce(
-    (acc, [key, value]) => {
-      if (!['sortBy', 'search'].includes(key)) {
-        acc[key] = acc[key] ? [...acc[key], value] : [value];
-      }
-      return acc;
-    },
-    {} as Record<string, string[]>
-  );
+  const { data, isLoading, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['posts', boardId, sortBy, searchQuery, filters],
+      queryFn: ({ pageParam }) =>
+        fetchPostPage({
+          boardId,
+          searchParams,
+          cursor: pageParam,
+        }),
+      initialPageParam: null as string | null,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    });
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['posts', boardId, sortBy, searchQuery, filters],
-    queryFn: async () => {
-      let query = boardId
-        ? supabase.from('posts_with_users').select('*').eq('board', boardId)
-        : supabase.from('posts_with_users').select('*');
+  const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-      if (searchQuery) {
-        query = query.ilike('title', `%${searchQuery}%`);
-      }
+  if (isLoading) {
+    return <Loader />;
+  }
 
-      Object.entries(filters).forEach(([key, values]) => {
-        console.log(values);
-        if (values.length > 1) {
-          if (key !== 'created_at') {
-            const notValues = values.filter((v) => v.startsWith('not:')).map((v) => v.replace('not:', ''));
-            const regularValues = values.filter((v) => !v.startsWith('not:'));
-            if (regularValues.length > 0) {
-              query = query.in(key, regularValues);
-            }
+  if (isError) {
+    return (
+      <div className="mt-8 text-center">
+        <p className="text-sm text-red-500/80">{error.message || 'Could not load posts.'}</p>
+        <Button className="mt-3" size="sm" onClick={() => refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
 
-            if (notValues.length > 0) {
-              query = query.not(key, 'in', `(${notValues})`);
-            }
-          }
-          return;
-        }
-
-        const value = values[0];
-
-        const [operator, actualValue] =
-          value.startsWith('not:') ||
-          value.startsWith('on:') ||
-          value.startsWith('after:') ||
-          value.startsWith('on_or_after:') ||
-          value.startsWith('before:') ||
-          value.startsWith('on_or_before:')
-            ? [value.split(':')[0], value.slice(value.indexOf(':') + 1)]
-            : ['', value];
-        console.log({ operator, actualValue });
-        if (key === 'created_at') {
-          const date = new Date(actualValue);
-          const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).toISOString();
-          const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0).toISOString();
-
-          switch (operator) {
-            case 'on':
-              query = query.gte(key, startOfDay).lt(key, endOfDay);
-              break;
-            case 'not':
-              query = query.not(key, 'gte', startOfDay).not(key, 'lt', endOfDay);
-              break;
-            case 'after':
-              query = query.gt(key, endOfDay);
-              break;
-            case 'on_or_after':
-              query = query.gte(key, startOfDay);
-              break;
-            case 'before':
-              query = query.lt(key, startOfDay);
-              break;
-            case 'on_or_before':
-              query = query.lt(key, endOfDay);
-              break;
-          }
-        } else {
-          if (operator === 'not') {
-            query = query.not(key, 'in', `(${actualValue})`);
-          } else {
-            query = query.in(key, [actualValue]);
-          }
-        }
-      });
-
-      query = query.order('is_pinned', { ascending: false, nullsFirst: false });
-
-      if (sortBy === 'comments_count') {
-        query = query
-          .order('comments_count', { ascending: false, nullsFirst: false })
-          .order('created_at', { ascending: false });
-      } else {
-        query = query.order(sortBy, { ascending: false, nullsFirst: false });
-      }
-      const res = await query;
-      return res?.data as PostWithUser[];
-    },
-  });
+  if (!posts.length) {
+    return <EmptyState />;
+  }
 
   return (
     <>
-      {isLoading ? (
-        <Loader />
-      ) : data?.length ? (
-        <div className="mt-4 overflow-hidden border-x rounded-lg bg-secondary/80 border-y border-primary/30">
-          <div className="w-full divide-y divide-primary/30">
-            {data?.map((post) => <PostCard key={post.id} {...post} refetch={refetch} />)}
-          </div>
+      <div className="mt-4 overflow-hidden border-x rounded-lg bg-secondary/80 border-y border-primary/30">
+        <div className="w-full divide-y divide-primary/30">
+          {posts.map((post: PostWithUser) => (
+            <PostCard key={post.id} {...post} refetch={refetch} />
+          ))}
         </div>
-      ) : (
-        <EmptyState />
-      )}
+      </div>
+
+      {hasNextPage ? (
+        <div className="flex justify-center mt-6">
+          <Button size="sm" disabled={isFetchingNextPage} onClick={() => fetchNextPage()}>
+            {isFetchingNextPage ? 'Loading…' : 'Load more'}
+          </Button>
+        </div>
+      ) : null}
 
       <div className="mt-16"></div>
     </>
