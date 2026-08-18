@@ -50,7 +50,7 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
   const [selectedIntegration, setSelectedIntegration] = useState<DropdownItem | null>(null);
 
   const createPost = async (postData: CreatePostPayload) => {
-    const { data, error } = await supabase.from('posts').insert(postData).select('*').single();
+    const { data, error } = await supabase.from('posts').insert(postData).select('id, title').single();
 
     if (error) {
       throw error;
@@ -62,16 +62,24 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
   const queryClient = useQueryClient();
 
   const { mutateAsync: createPostMutation, isPending } = useMutation({
-    mutationFn: async () =>
-      await createPost({
-        board: selectedBoard?.value || 'feature_request',
+    mutationFn: async () => {
+      if (!user?.id) {
+        throw new Error('Sign in to create a post');
+      }
+
+      if (!selectedBoard?.value) {
+        throw new Error('Select a board before creating a post');
+      }
+
+      return createPost({
+        board: selectedBoard.value,
         bug_sources: selectedBugSources,
-        user_id: user?.id || '',
         description,
-        integrations: selectedIntegration?.value ? [selectedIntegration?.value] : null,
+        integrations: selectedIntegration?.value ? [selectedIntegration.value] : null,
         module: selectedModule?.value,
         title,
-      }),
+      });
+    },
     onSuccess: (data) => {
       toast.success('Post created successfully!', {
         description: `Your post "${data.title}" has been created.`,
@@ -233,7 +241,7 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
           <Button
             size="sm"
             className="text-xs text-primary-foreground"
-            disabled={isPending}
+            disabled={isPending || !user?.id || !selectedBoard?.value}
             onClick={async () => {
               setIsSubmitted(true);
               if (!isInvalid) {
