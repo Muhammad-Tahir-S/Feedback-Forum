@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { parseAuthCallbackLocation } from '@/auth/authUrls';
 import supabase from '@/lib/supabase';
 
 const AuthCallback = () => {
@@ -11,10 +12,7 @@ const AuthCallback = () => {
     let cancelled = false;
 
     const complete = async () => {
-      const search = new URLSearchParams(window.location.search);
-      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-      const error =
-        search.get('error_description') || search.get('error') || hash.get('error_description') || hash.get('error');
+      const { error, code } = parseAuthCallbackLocation(window.location.search, window.location.hash);
 
       if (error) {
         if (!cancelled) {
@@ -23,8 +21,6 @@ const AuthCallback = () => {
         }
         return;
       }
-
-      const code = search.get('code');
       const { data: existing } = await supabase.auth.getUser();
       if (cancelled) return;
 

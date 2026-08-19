@@ -1,9 +1,9 @@
 import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
-import { useLocalStorage } from '@uidotdev/usehooks';
-import { Database } from 'database.types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import { AUTH_CALLBACK_PATH, isRecoveryRedirect, UPDATE_PASSWORD_PATH } from '@/auth/authUrls';
+import { queryClient } from '@/lib/queryClient';
 import { UserType } from '@/types/auth';
 
 import supabase from '../lib/supabase';
@@ -20,7 +20,6 @@ type AuthContextType = {
   resetPassword: (email: string) => ReturnType<typeof supabase.auth.resetPasswordForEmail>;
   updatePassword: (password: string) => ReturnType<typeof supabase.auth.updateUser>;
 };
-type Board = Database['public']['Tables']['boards']['Row'];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -29,7 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
-  const [boards] = useLocalStorage<Board[] | null>('boards');
 
   useEffect(() => {
     let cancelled = false;
@@ -66,7 +64,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!error && data.user) {
         const { data: sessionData } = await supabase.auth.getSession();
         applyVerifiedUser(data.user, sessionData.session);
-        if (isRecoveryRedirect()) {
+        if (
+          isRecoveryRedirect({
+            search: window.location.search,
+            hash: window.location.hash,
+            pathname: window.location.pathname,
+          })
+        ) {
           setIsPasswordRecovery(true);
         }
       } else {
@@ -81,19 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    if (user && !boards) {
-      supabase
-        .from('boards')
-        .select('id, name, value')
-        .then(({ data }) => {
-          if (data?.length) {
-            localStorage.setItem('boards', JSON.stringify(data));
-          }
-        });
-    }
-  }, [user, boards]);
 
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
@@ -135,18 +126,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
       },
     });
+
+    if (error) {
+      toast.error('Google sign in failed', {
+        description: error.message,
+      });
+      throw error;
+    }
   };
 
   const signOut = async () => {
     setLoading(true);
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+
+    queryClient.clear();
     localStorage.removeItem('boards');
+
+    if (error) {
+      toast.error('Sign out failed', {
+        description: error.message,
+      });
+      setLoading(false);
+      throw error;
+    }
 
     toast.info('Signed out', {
       description: 'You have been successfully signed out.',
@@ -158,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string) => {
     setLoading(true);
     const response = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
+      redirectTo: `${window.location.origin}${UPDATE_PASSWORD_PATH}`,
     });
 
     if (response.error) {
@@ -237,13 +245,3 @@ function getUserFromSupabase(user: User): UserType {
   };
 }
 
-function isRecoveryRedirect() {
-  const search = new URLSearchParams(window.location.search);
-  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-
-  return (
-    hash.get('type') === 'recovery' ||
-    search.get('type') === 'recovery' ||
-    (window.location.pathname.includes('/auth/update-password') && search.has('code'))
-  );
-}
