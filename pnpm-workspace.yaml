@@ -1,0 +1,11 @@
+# Supply-chain settings (pnpm 10.26+). This file is also valid for a
+# single-package repo; it is not a multi-workspace declaration.
+minimumReleaseAge: 10080 # 7 days
+minimumReleaseAgeExclude:
+  # Exact-pinned CLI; its optional platform binaries can publish after the meta package.
+  - supabase
+  - '@supabase/cli-*'
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+# Default-deny install scripts. Add a package only if its postinstall is required.
+allowBuilds: {}
