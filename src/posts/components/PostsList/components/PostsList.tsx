@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import useGetBoardId from '@/hooks/useGetBoardId';
+import { queryKeys } from '@/lib/queryClient';
 import { collectFilters, fetchPostPage, parseSortBy } from '@/posts/listQuery';
 import { PostWithUser } from '@/posts/types';
 
@@ -10,7 +11,7 @@ import EmptyState from '../../EmptyState';
 import { PostCard } from './PostCard';
 
 export default function PostsList() {
-  const { boardId } = useGetBoardId();
+  const { boardId, isLoading: boardsLoading } = useGetBoardId();
   const [searchParams] = useSearchParams();
   const sortBy = parseSortBy(searchParams.get('sortBy'));
   const searchQuery = searchParams.get('search') || '';
@@ -18,7 +19,7 @@ export default function PostsList() {
 
   const { data, isLoading, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ['posts', boardId, sortBy, searchQuery, filters],
+      queryKey: [...queryKeys.posts, boardId, sortBy, searchQuery, filters],
       queryFn: ({ pageParam }) =>
         fetchPostPage({
           boardId,
@@ -27,11 +28,12 @@ export default function PostsList() {
         }),
       initialPageParam: null as string | null,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !boardsLoading,
     });
 
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  if (isLoading) {
+  if (boardsLoading || isLoading) {
     return <Loader />;
   }
 
@@ -55,7 +57,7 @@ export default function PostsList() {
       <div className="mt-4 overflow-hidden border-x rounded-lg bg-secondary/80 border-y border-primary/30">
         <div className="w-full divide-y divide-primary/30">
           {posts.map((post: PostWithUser) => (
-            <PostCard key={post.id} {...post} refetch={refetch} />
+            <PostCard key={post.id} {...post} />
           ))}
         </div>
       </div>

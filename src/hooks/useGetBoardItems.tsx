@@ -1,14 +1,27 @@
-import { useLocalStorage } from '@uidotdev/usehooks';
+import { useQuery } from '@tanstack/react-query';
 import { Database } from 'database.types';
 import { ReactNode } from 'react';
 
+import { useAuth } from '@/contexts/AuthContext';
 import { paths } from '@/lib/paths';
+import { queryKeys } from '@/lib/queryClient';
+import supabase from '@/lib/supabase';
 
-type Board = Database['public']['Tables']['boards']['Row'];
+type Board = Pick<Database['public']['Tables']['boards']['Row'], 'id' | 'name' | 'value'>;
 type Path = (typeof paths)[number];
 
 export default function useGetBoardItems() {
-  const [boards] = useLocalStorage<Board[] | null>('boards');
+  const { user } = useAuth();
+  const { data: boards, isLoading } = useQuery({
+    queryKey: queryKeys.boards,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('boards').select('id, name, value');
+      if (error) throw error;
+      return (data ?? []) as Board[];
+    },
+    enabled: Boolean(user),
+    staleTime: 5 * 60 * 1000,
+  });
 
   const boardItems: {
     label: (string & {}) | Path['title'];
@@ -69,5 +82,5 @@ export default function useGetBoardItems() {
     },
   ].map((item) => ({ ...item, id: boards?.find((b) => b.name === item.label)?.id }));
 
-  return { boards: boardItems };
+  return { boards: boardItems, isLoading };
 }

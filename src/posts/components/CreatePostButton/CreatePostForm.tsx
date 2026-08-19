@@ -2,8 +2,7 @@ import { DialogTitle } from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Database } from 'database.types';
 import { ChevronRight, X } from 'lucide-react';
-import { ComponentProps, useState } from 'react';
-import { useLocation } from 'react-router';
+import { ComponentProps, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import ProseMirrorEditor from '@/components/ProseMirroEditor';
@@ -12,6 +11,7 @@ import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu
 import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
+import { queryKeys } from '@/lib/queryClient';
 import supabase from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -24,16 +24,12 @@ type CreatePostPayload = Database['public']['Tables']['posts']['Insert'];
 
 export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
   const { user } = useAuth();
-  const location = useLocation();
 
   const [title, setTitle] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [description, setDescription] = useState('');
   const [selectedBugSources, setSelectedBugSources] = useState<string[] | null>(null);
   const { boards } = useGetBoardItems();
-
-  const boardId =
-    location?.pathname === '/posts' ? undefined : boards.find((item) => item.path === location?.pathname)?.id;
 
   const boardOptions = boards
     .filter((item) => item.path !== '/posts')
@@ -42,9 +38,12 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
       icon: item.icon,
       value: item.id || '',
     }));
-  const [selectedBoard, setSelectedBoard] = useState<DropdownItem | null>(
-    boardOptions.find((opt) => opt.label === 'Feature Request') || null
-  );
+  const [selectedBoard, setSelectedBoard] = useState<DropdownItem | null>(null);
+
+  useEffect(() => {
+    if (selectedBoard || !boardOptions.length) return;
+    setSelectedBoard(boardOptions.find((opt) => opt.label === 'Feature Request') || boardOptions[0]);
+  }, [boardOptions, selectedBoard]);
 
   const [selectedModule, setSelectedModule] = useState<DropdownItem | null>(null);
   const [selectedIntegration, setSelectedIntegration] = useState<DropdownItem | null>(null);
@@ -85,7 +84,7 @@ export default function CreatePostForm({ onClose }: { onClose: VoidFunction }) {
         description: `Your post "${data.title}" has been created.`,
       });
       onClose();
-      queryClient.invalidateQueries({ queryKey: ['posts', boardId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts });
     },
     onError: (error) => {
       toast.error('Failed to create post', {

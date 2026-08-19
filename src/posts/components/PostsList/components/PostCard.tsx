@@ -1,10 +1,11 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
+import { queryKeys } from '@/lib/queryClient';
 import supabase from '@/lib/supabase';
 import { formatRelativeTime } from '@/lib/utils';
 import { PostWithUser } from '@/posts/types';
@@ -20,10 +21,10 @@ export const PostCard = ({
   is_pinned,
   comments_count,
   votes_count,
-  refetch,
-}: PostWithUser & { refetch: VoidFunction }) => {
+}: PostWithUser) => {
   const { boards } = useGetBoardItems();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const postBoard = boards.find((b) => b?.id === board);
 
@@ -63,7 +64,7 @@ export const PostCard = ({
       if (error) throw error;
     },
     onSuccess: () => {
-      refetch();
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts });
     },
     onError: (error) => {
       toast.error('Could not update vote', {
