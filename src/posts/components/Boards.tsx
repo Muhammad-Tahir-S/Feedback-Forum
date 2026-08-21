@@ -1,10 +1,13 @@
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { P } from '@/components/ui/typography';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
+import { parsePostsPath } from '@/lib/postsPath';
 import { cn } from '@/lib/utils';
 
 export default function Boards() {
+  const location = useLocation();
+  const { boardPath } = parsePostsPath(location.pathname);
   const { boards } = useGetBoardItems();
 
   const boardItems = boards.map((item) => ({
@@ -25,7 +28,7 @@ export default function Boards() {
             }}
             className={cn(
               'flex items-center group hover:bg-secondary text-left w-full px-2 py-1.5 text-sm font-medium text-foreground rounded-[6px] hover:shadow-md border border-transparent hover:border-primary/40 transition-all duration-300',
-              location.pathname === path ? 'bg-secondary shadow-md border-primary/40 ' : ''
+              boardPath === path ? 'bg-secondary shadow-md border-primary/40 ' : ''
             )}
           >
             <span className="flex items-center space-x-2">

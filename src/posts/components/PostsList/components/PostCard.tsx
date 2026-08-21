@@ -1,13 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
+import { getPostLinkPath } from '@/lib/postsPath';
 import { queryKeys } from '@/lib/queryClient';
 import supabase from '@/lib/supabase';
 import { formatRelativeTime } from '@/lib/utils';
+import { STATUS_LABELS, STATUS_STYLES } from '@/posts/postDisplay';
 import { PostWithUser } from '@/posts/types';
 
 export const PostCard = ({
@@ -22,29 +24,12 @@ export const PostCard = ({
   comments_count,
   votes_count,
 }: PostWithUser) => {
+  const location = useLocation();
   const { boards } = useGetBoardItems();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const postBoard = boards.find((b) => b?.id === board);
-
-  const statusStyles: { [k in NonNullable<PostWithUser['status']>]: string } = {
-    in_progress: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/10',
-    planned: 'bg-purple-500/10 text-purple-500 border-purple-500/10',
-    completed: 'bg-green-500/10 text-green-500 border-green-500/10',
-    pending: 'bg-gray-500/10 text-gray-500 border-gray-500/10',
-    rejected: 'bg-red-500/10 text-red-500 border-red-500/10',
-    closed: 'bg-blue-500/10 text-blue-500 border-blue-500/10',
-  };
-
-  const statusText: { [k in NonNullable<PostWithUser['status']>]: string } = {
-    in_progress: 'In Progress',
-    planned: 'Planned',
-    completed: 'Completed',
-    pending: 'Pending',
-    rejected: 'Rejected',
-    closed: 'Closed',
-  };
 
   const isUpvoted = Boolean(user?.id && hasVoted);
 
@@ -79,7 +64,10 @@ export const PostCard = ({
         aria-label={`View post ${title}`}
         role="button"
         className="w-full h-full min-w-0 py-4 px-4 pr-3 my-auto overflow-auto rounded-md cursor-pointer sm:px-5 sm:py-5"
-        to={`/posts/${id}`}
+        to={{
+          pathname: getPostLinkPath(location.pathname, id),
+          search: location.search,
+        }}
       >
         <div className="relative">
           {is_pinned && (
@@ -112,10 +100,10 @@ export const PostCard = ({
           <div className="inline-block mb-2">
             <p
               className={`px-2 py-0.5 flex items-center text-xs font-medium rounded-md border pointer-events-none ${
-                statusStyles[status]
+                STATUS_STYLES[status]
               }`}
             >
-              {statusText[status]}
+              {STATUS_LABELS[status]}
             </p>
           </div>
 

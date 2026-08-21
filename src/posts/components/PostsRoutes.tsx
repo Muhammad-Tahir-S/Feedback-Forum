@@ -1,23 +1,27 @@
 import { Route, Routes } from 'react-router-dom';
 
 import NotFound from '@/app/components/NotFound';
-import useGetBoardItems from '@/hooks/useGetBoardItems';
+import { getBoardSlugs } from '@/lib/postsPath';
 
+import PostDialogRoute from './PostDialogRoute';
 import PostsLayout from './PostsLayout';
-import PostsList from './PostsList';
 
 export default function PostRoutes() {
-  const { boards } = useGetBoardItems();
+  const boardSlugs = getBoardSlugs();
 
   return (
     <Routes>
       <Route path="/*" element={<PostsLayout />}>
-        <Route index element={<PostsList />} />
+        <Route index element={null} />
 
-        {boards.map(({ label, path }) => {
-          return <Route key={label} path={path.split('/').at(-1)} element={<PostsList />} />;
-        })}
+        {boardSlugs.map((slug) => (
+          <Route key={slug} path={slug}>
+            <Route index element={null} />
+            <Route path=":postId" element={<PostDialogRoute />} />
+          </Route>
+        ))}
 
+        <Route path=":postId" element={<PostDialogRoute />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

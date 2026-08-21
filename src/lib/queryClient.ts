@@ -11,4 +11,6 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
   posts: ['posts'] as const,
   boards: ['boards'] as const,
+  post: (postId: string) => ['post', postId] as const,
+  comments: (postId: string) => ['comments', postId] as const,
 };

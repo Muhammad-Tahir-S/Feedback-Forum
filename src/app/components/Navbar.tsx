@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import useGetBoardItems from '@/hooks/useGetBoardItems';
 import { paths } from '@/lib/paths';
+import { parsePostsPath } from '@/lib/postsPath';
 import { cn } from '@/lib/utils';
 
 type Path = (typeof paths)[number];
@@ -22,29 +23,43 @@ type Tab = {
 
 export default function Navbar() {
   const location = useLocation();
-  const activePathname = location.pathname;
-  const activePath = paths.find(({ pathname }) => pathname === activePathname);
+  const parsed = parsePostsPath(location.pathname);
+  const isPostsRoute = location.pathname.startsWith('/posts');
+  const boardPath = isPostsRoute && !parsed.isInvalid ? parsed.boardPath : null;
+  const activePath = boardPath ? paths.find(({ pathname }) => pathname === boardPath) : undefined;
 
   const { boards } = useGetBoardItems();
 
   const tabItems: Tab[] = [
     {
       icon: <FeedbackIcon />,
-      label: boards.some((item) => item.path === activePath?.pathname) ? activePath?.title : 'Feedback',
-      path: boards.find((item) => item.path === activePath?.pathname)?.path,
+      label: activePath ? activePath.title : 'Feedback',
+      path: boardPath ?? undefined,
       dropdownItems: boards,
     },
   ];
 
-  const tabs = tabItems.map((item) => ({
-    ...item,
-    isExternalLink: paths?.find((path) => path.pathname === item?.path)?.isExternalLink,
-  }));
+  const tabs = tabItems.map((item) => {
+    const matchedPath = paths.find((path) => path.pathname === item?.path);
 
-  return <NavTabs tabs={tabs} activePathname={activePathname} />;
+    return {
+      ...item,
+      isExternalLink: matchedPath && 'isExternalLink' in matchedPath ? Boolean(matchedPath.isExternalLink) : false,
+    };
+  });
+
+  return <NavTabs tabs={tabs} activePathname={boardPath ?? ''} locationSearch={location.search} />;
 }
 
-export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname: string }) {
+export function NavTabs({
+  tabs,
+  activePathname,
+  locationSearch,
+}: {
+  tabs: Tab[];
+  activePathname: string;
+  locationSearch: string;
+}) {
   return (
     <div className={cn('flex items-center mt-4 -mb-px space-x-1 overflow-x-auto scrollbar-none sm:space-x-5')}>
       {tabs.map((tab) => (
@@ -54,13 +69,13 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
               <DropdownMenuTrigger
                 className={cn(
                   tabTriggerBaseStyles,
-                  activePathname === tab.path ? tabTriggerActiveStyles : tabTriggerInactiveStyles
+                  activePathname && activePathname === tab.path ? tabTriggerActiveStyles : tabTriggerInactiveStyles
                 )}
               >
                 <span
                   className={cn(
                     tabIconBaseStyles,
-                    activePathname === tab.path ? tabIconActiveStyles : tabIconInactiveStyles
+                    activePathname && activePathname === tab.path ? tabIconActiveStyles : tabIconInactiveStyles
                   )}
                 >
                   {tab.icon}
@@ -77,7 +92,7 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
                     fill="currentColor"
                     className={cn(
                       'w-4 h-4 ml-1 sm:w-5 sm:h-5',
-                      activePathname === tab.path ? tabIconActiveStyles : tabIconInactiveStyles
+                      activePathname && activePathname === tab.path ? tabIconActiveStyles : tabIconInactiveStyles
                     )}
                   >
                     <path
@@ -94,10 +109,10 @@ export function NavTabs({ tabs, activePathname }: { tabs: Tab[]; activePathname:
                     key={index}
                     to={{
                       pathname: item.path,
-                      search: location.search,
+                      search: locationSearch,
                     }}
                   >
-                    <DropdownMenuItem>
+                    <DropdownMenuItem className={cn(item.path === activePathname && 'bg-secondary')}>
                       <span className="flex items-center space-x-2">
                         {item.icon && <span>{item.icon}</span>}
                         <span>{item.label}</span>
