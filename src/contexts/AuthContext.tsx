@@ -1,4 +1,4 @@
-import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
+import { AuthChangeEvent, AuthError, Session, User } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -19,6 +19,7 @@ type AuthContextType = {
   loading: boolean;
   resetPassword: (email: string) => ReturnType<typeof supabase.auth.resetPasswordForEmail>;
   updatePassword: (password: string) => ReturnType<typeof supabase.auth.updateUser>;
+  resendVerificationEmail: (email: string) => ReturnType<typeof supabase.auth.resend>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -91,7 +92,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { username } },
+      options: {
+        data: { username },
+        emailRedirectTo: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
+      },
     });
 
     if (response.error) {
@@ -99,9 +103,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: response.error.message,
       });
     } else if (response.data?.user) {
-      toast.success('Verification email sent', {
-        description: 'Please check your email to verify your account.',
-      });
+      const { user, session } = response.data;
+      const isDuplicateEmail = Array.isArray(user.identities) && user.identities.length === 0;
+
+      if (isDuplicateEmail) {
+        toast.error('Sign up failed', {
+          description: 'Unable to create account. Please try again or sign in.',
+        });
+        setLoading(false);
+        return {
+          data: { user: null, session: null },
+          error: new AuthError('Unable to create account. Please try again or sign in.', 400),
+        };
+      }
+
+      if (!session) {
+        toast.success('Verification email sent', {
+          description: 'Please check your email to verify your account before signing in.',
+        });
+      }
     }
 
     setLoading(false);
@@ -115,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
 
-    if (response.error) {
+    if (response.error && response.error.code !== 'email_not_confirmed') {
       toast.error('Sign in failed', {
         description: response.error.message,
       });
@@ -183,6 +203,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return response;
   };
 
+  const resendVerificationEmail = async (email: string) => {
+    setLoading(true);
+    const response = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
+      },
+    });
+
+    if (response.error) {
+      toast.error('Could not resend verification email', {
+        description: response.error.message,
+      });
+    } else {
+      toast.success('Verification email sent', {
+        description: 'Please check your email for the confirmation link.',
+      });
+    }
+
+    setLoading(false);
+    return response;
+  };
+
   const updatePassword = async (password: string) => {
     if (!isPasswordRecovery) {
       const message = 'Password can only be updated from a reset link.';
@@ -223,6 +267,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     resetPassword,
     updatePassword,
+    resendVerificationEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -244,4 +289,3 @@ function getUserFromSupabase(user: User): UserType {
     avatar_url: '',
   };
 }
-

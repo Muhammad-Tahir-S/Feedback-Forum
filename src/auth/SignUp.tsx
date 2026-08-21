@@ -5,10 +5,10 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
+import { MIN_PASSWORD_LENGTH, passwordMessage } from '@/auth/passwordPolicy';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MIN_PASSWORD_LENGTH, passwordMessage } from '@/auth/passwordPolicy';
 import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z
@@ -50,7 +50,9 @@ const SignUp: React.FC = () => {
   return (
     <div>
       <h2 className="text-2xl font-bold text-card-foreground">Sign up</h2>
-      <p className="text-muted-foreground">Enter your email below to create your account</p>
+      <p className="text-muted-foreground">
+        Enter your email below to create your account. You will need to verify your email before signing in.
+      </p>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">

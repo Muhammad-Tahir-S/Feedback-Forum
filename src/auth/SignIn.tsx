@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -15,13 +16,12 @@ const formSchema = z.object({
 });
 
 const SignIn = () => {
-  const {
-    signIn,
-    // signInWithGoogle
-  } = useAuth();
+  const { signIn, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const authError = (location.state as { authError?: string } | null)?.authError;
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,11 +34,29 @@ const SignIn = () => {
   const isSubmitting = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setNeedsVerification(false);
     const { error } = await signIn(values.email, values.password);
+
+    if (error?.code === 'email_not_confirmed') {
+      setNeedsVerification(true);
+      return;
+    }
 
     if (!error) {
       navigate('/posts');
     }
+  };
+
+  const handleResendVerification = async () => {
+    const email = form.getValues('email');
+    if (!email) {
+      form.setError('email', { type: 'manual', message: 'Enter your email to resend verification.' });
+      return;
+    }
+
+    setIsResending(true);
+    await resendVerificationEmail(email);
+    setIsResending(false);
   };
 
   // const handleGoogleSignIn = async () => {
@@ -58,6 +76,22 @@ const SignIn = () => {
       <p className="text-muted-foreground">Enter your credentials to access your account</p>
 
       {authError ? <div className="mt-4 rounded-md bg-red-100 p-3 text-sm text-red-800">{authError}</div> : null}
+
+      {needsVerification ? (
+        <div className="mt-4 space-y-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+          <p>Please verify your email before signing in. Check your inbox for the confirmation link.</p>
+          <Button type="button" variant="outline" size="sm" disabled={isResending} onClick={handleResendVerification}>
+            {isResending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              'Resend verification email'
+            )}
+          </Button>
+        </div>
+      ) : null}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
