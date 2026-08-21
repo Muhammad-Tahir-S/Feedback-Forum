@@ -8,7 +8,7 @@ function AuthLayout() {
     <div className="flex h-[100dvh] w-[100dvw] flex-col items-center justify-center bg-background p-4">
       <div className="mb-8 text-center">
         <Link to="/" className="text-2xl font-bold text-primary hover:underline">
-          Featurebase
+          Feedback Forum
         </Link>
         <p className="mt-1 text-sm text-muted-foreground">Welcome back! Please sign in or create an account.</p>
       </div>

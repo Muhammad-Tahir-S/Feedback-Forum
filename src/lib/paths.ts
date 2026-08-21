@@ -8,5 +8,4 @@ export const paths = [
   { pathname: '/feedback-roadmap' as const, title: 'Feedback Roadmap' as const },
   { pathname: '/changelog-roadmap' as const, title: 'Changelog Roadmap' as const },
   { pathname: '/changelog' as const, title: 'Changelog' as const },
-  { pathname: 'https://help.featurebase.app' as const, title: 'Help Center' as const, isExternalLink: true },
 ];

@@ -14,7 +14,7 @@ export default function PostsLayout() {
         <div className="relative p-4 overflow-hidden rounded-[8px] bg-card/50 border border-primary/80">
           <Large className="text-white">Share your product feedback!</Large>
           <Muted className="text-muted-foreground mt-1.5">
-            Please tell us what we can do to make Featurebase the best product for you.
+            Please tell us what we can do to make this the best product for you.
           </Muted>
           <div className="z-20 mt-3 lg:hidden">
             <CreatePostButton />

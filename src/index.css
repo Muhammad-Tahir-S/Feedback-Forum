@@ -11,7 +11,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.17 0.03 260);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.55 0.24 270); /* Purple - like the Featurebase logo */
+  --primary: oklch(0.55 0.24 270); /* Purple - like the logo */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.18 0.04 260); /* Slightly lighter blue */
   --secondary-foreground: oklch(0.985 0 0);
