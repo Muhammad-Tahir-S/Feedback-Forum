@@ -1,6 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { H1, H3, Lead } from '@/components/ui/typography';
+import { H1, Lead } from '@/components/ui/typography';
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -47,25 +47,6 @@ const NotFound = () => {
         >
           Return Home
         </button>
-      </div>
-
-      <div className="mt-12 border-t border-border pt-8 w-full max-w-md">
-        <H3 className="mb-4 text-center">You might be looking for</H3>
-
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link to="/posts" className="text-primary hover:text-primary/90 transition-colors">
-            Feedback
-          </Link>
-          <Link to="/roadmap" className="text-primary hover:text-primary/90 transition-colors">
-            Roadmap
-          </Link>
-          <Link to="/changelog" className="text-primary hover:text-primary/90 transition-colors">
-            Changelog
-          </Link>
-          <Link to="/help" className="text-primary hover:text-primary/90 transition-colors">
-            Help Center
-          </Link>
-        </div>
       </div>
     </div>
   );
