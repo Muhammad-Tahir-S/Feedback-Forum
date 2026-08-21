@@ -86,5 +86,11 @@
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0",
     "vitest": "4.1.10"
+  },
+  "pnpm": {
+    "overrides": {
+      "semver": "7.8.5",
+      "undici-types": "6.28.0"
+    }
   }
 }
