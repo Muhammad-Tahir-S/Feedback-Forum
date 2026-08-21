@@ -1,21 +1,15 @@
-import {
-  Badge,
-  Bell,
-  LogOut,
-  // Stars,
-  UserCircle,
-} from 'lucide-react';
+import { Badge, LogOut, UserCircle } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  // DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { H3 } from '@/components/ui/typography';
+import { H3, Muted } from '@/components/ui/typography';
 import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -26,53 +20,62 @@ export default function ToolBar() {
         <div className="size-9 rounded-full bg-primary flex items-center justify-center shrink-0">
           <Badge className="size-[70%] stroke-4" />
         </div>
-        <H3 className="truncate max-w-xs text-secondary-foreground">Featurebase Clone</H3>
+        <H3 className="truncate max-w-xs text-secondary-foreground">Feedback Forum</H3>
       </Link>
 
       <div className="flex gap-4">
-        <Notifications />
         <UserDropdown />
       </div>
     </div>
   );
 }
 
-function Notifications() {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="size-9 rounded-full p-[7px] outline-0 bg-secondary border border-border cursor-pointer hover:bg-border"
-        >
-          <Bell className="size-5 fill-secondary-foreground" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80" align="end"></PopoverContent>
-    </Popover>
-  );
-}
-
 function UserDropdown() {
-  const { signOut, loading } = useAuth();
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button type="button" className="outline-0 rounded-full cursor-pointer hover:bg-border">
-          <UserAvatar />
-        </button>
-      </DropdownMenuTrigger>
+  const { user, signOut, loading } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
-      <DropdownMenuContent className="w-[208px]" align="end">
-        <DropdownMenuItem>
-          <UserCircle /> My Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled={loading} onClick={signOut}>
-          <LogOut /> Sign out
-        </DropdownMenuItem>
-        {/* <DropdownMenuSeparator /> */}
-        {/* <DropdownMenuItem><Stars className='fill-amber-400' />Create your own feedback board</DropdownMenuItem> */}
-      </DropdownMenuContent>
-    </DropdownMenu>
+  const displayName = user?.username || user?.email || 'User';
+
+  return (
+    <>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className="outline-0 rounded-full cursor-pointer hover:bg-border">
+            <UserAvatar />
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent className="w-[208px]" align="end">
+          <DropdownMenuItem
+            onSelect={(event) => {
+              event.preventDefault();
+              setDropdownOpen(false);
+              setProfileOpen(true);
+            }}
+          >
+            <UserCircle /> My Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled={loading} onClick={signOut}>
+            <LogOut /> Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-w-md" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle>Profile</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 px-4 pb-6 text-center">
+            <UserAvatar className="size-20" />
+            <div className="min-w-0 w-full">
+              <p className="truncate text-base font-semibold text-foreground">{displayName}</p>
+              {user?.email ? <Muted className="truncate text-sm mt-1">{user.email}</Muted> : null}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
